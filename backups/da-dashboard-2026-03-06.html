@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MEA — DA Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#00003C;
+  --blue:#144BD8;
+  --blue2:#2D5BF7;
+  --off:#F4F6FF;
+  --g1:#F0F2FA;
+  --g2:#E2E6F3;
+  --g3:#B8BFD8;
+  --g4:#7B84A3;
+  --green:#00B67A;
+  --orange:#E8744F;
+  --red:#E53E3E;
+  --gold:#CC8800;
+  --font:'Plus Jakarta Sans',sans-serif;
+  --body:'Inter',sans-serif;
+  --sidebar:240px;
+}
+html,body{height:100%;font-family:var(--font);background:var(--off);color:var(--navy);-webkit-font-smoothing:antialiased;}
+a{text-decoration:none;color:inherit;}
+[onclick]{cursor:pointer;}
+
+/* ── Layout ── */
+.shell{display:flex;height:100vh;overflow:hidden;}
+.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;overflow:hidden;}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{height:60px;background:#fff;border-bottom:1px solid var(--g2);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0;}
+.content{flex:1;overflow-y:auto;padding:28px;}
+
+/* ── Sidebar ── */
+.sb-brand{padding:20px 20px 8px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:8px;}
+.sb-logo{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--blue2),var(--blue));display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.sb-logo img{width:22px;height:22px;object-fit:contain;}
+.sb-name{font-size:15px;font-weight:800;color:#fff;}
+.sb-sub{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px;font-weight:500;}
+.sb-section{font-size:10px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.8px;padding:12px 20px 4px;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;transition:background .15s,color .15s;border-radius:0;}
+.sb-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85);}
+.sb-item.on{background:rgba(45,91,247,.25);color:#fff;border-right:2px solid var(--blue2);}
+.sb-item .ico{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;}
+.sb-badge.gold{background:var(--gold);}
+.sb-footer{margin-top:auto;padding:16px 20px;border-top:1px solid rgba(255,255,255,.08);}
+.sb-user{display:flex;align-items:center;gap:10px;}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#5B21B6,#2D0A6A);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.sb-uname{font-size:12px;font-weight:700;color:#fff;line-height:1.3;}
+.sb-urole{font-size:10px;color:rgba(255,255,255,.4);}
+
+/* ── Topbar ── */
+.tb-left{display:flex;align-items:center;gap:16px;}
+.tb-title{font-size:18px;font-weight:800;color:var(--navy);}
+.tb-sub{font-size:13px;color:var(--g4);}
+.tb-right{display:flex;align-items:center;gap:12px;}
+.tb-chip{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:var(--g1);font-size:13px;font-weight:600;color:var(--g4);border:1px solid var(--g2);}
+.tb-dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
+.tb-icon-btn{width:36px;height:36px;border-radius:50%;background:var(--g1);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+.tb-icon-btn.notif{position:relative;}
+.notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--red);border:1.5px solid #fff;}
+
+/* ── Stat cards ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.stat-card{background:#fff;border-radius:16px;padding:18px 20px;border:1px solid var(--g2);}
+.stat-label{font-size:11px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.stat-val{font-size:32px;font-weight:800;color:var(--navy);letter-spacing:-.5px;line-height:1;}
+.stat-delta{font-size:12px;font-weight:600;margin-top:6px;}
+.stat-delta.up{color:var(--green);}
+.stat-delta.warn{color:var(--gold);}
+.stat-delta.alert{color:var(--red);}
+
+/* ── Section header ── */
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.sec-title{font-size:15px;font-weight:800;color:var(--navy);}
+.sec-link{font-size:13px;font-weight:600;color:var(--blue);cursor:pointer;}
+.sec-tabs{display:flex;gap:6px;}
+.sec-tab{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--g2);background:#fff;color:var(--g4);transition:all .15s;}
+.sec-tab.on{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+/* ── Table ── */
+.table-wrap{background:#fff;border-radius:16px;border:1px solid var(--g2);overflow:hidden;margin-bottom:24px;}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:12px 16px;font-size:11px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.6px;text-align:left;border-bottom:1px solid var(--g2);background:var(--g1);}
+tbody tr{border-bottom:1px solid var(--g2);cursor:pointer;transition:background .12s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#F8F9FE;}
+tbody td{padding:13px 16px;font-size:13px;color:var(--navy);}
+
+/* ── Status badges ── */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge.track{background:rgba(0,182,122,.1);color:var(--green);}
+.badge.risk{background:rgba(204,136,0,.1);color:var(--gold);}
+.badge.done{background:rgba(20,75,216,.1);color:var(--blue);}
+.badge.fail{background:rgba(229,62,62,.1);color:var(--red);}
+.badge.new{background:rgba(107,64,217,.1);color:#6B40D9;}
+
+/* ── Progress bar (in table) ── */
+.prog-wrap{display:flex;align-items:center;gap:8px;}
+.prog-bar{flex:1;height:5px;background:var(--g2);border-radius:3px;overflow:hidden;max-width:80px;}
+.prog-fill{height:100%;border-radius:3px;transition:width .4s ease;}
+.prog-fill.g{background:linear-gradient(90deg,#00B67A,#00D68F);}
+.prog-fill.y{background:linear-gradient(90deg,#CC8800,#FFD700);}
+.prog-fill.r{background:linear-gradient(90deg,#E53E3E,#FC8181);}
+.prog-fill.b{background:linear-gradient(90deg,#144BD8,#2D5BF7);}
+.prog-pct{font-size:11px;font-weight:700;color:var(--g4);white-space:nowrap;}
+
+/* ── Two-col layout ── */
+.two-col{display:grid;grid-template-columns:1fr 380px;gap:16px;margin-bottom:24px;}
+.panel{background:#fff;border-radius:16px;border:1px solid var(--g2);overflow:hidden;}
+.panel-head{padding:16px 20px;border-bottom:1px solid var(--g2);display:flex;align-items:center;justify-content:space-between;}
+.panel-title{font-size:14px;font-weight:800;color:var(--navy);}
+.panel-body{padding:16px 20px;}
+
+/* ── Activity feed ── */
+.activity-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--g2);}
+.activity-item:last-child{border-bottom:none;}
+.act-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.act-dot.g{background:var(--green);}
+.act-dot.y{background:var(--gold);}
+.act-dot.r{background:var(--red);}
+.act-dot.b{background:var(--blue);}
+.act-text{font-size:13px;color:var(--navy);line-height:1.5;}
+.act-time{font-size:11px;color:var(--g4);margin-top:2px;}
+
+/* ── Alerts panel ── */
+.alert-item{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--g2);}
+.alert-item:last-child{border-bottom:none;}
+.alert-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.alert-ico.r{background:rgba(229,62,62,.1);}
+.alert-ico.y{background:rgba(204,136,0,.1);}
+.alert-ico.g{background:rgba(0,182,122,.1);}
+.alert-body{flex:1;}
+.alert-name{font-size:13px;font-weight:700;color:var(--navy);}
+.alert-desc{font-size:12px;color:var(--g4);margin-top:1px;line-height:1.4;}
+.alert-action{font-size:12px;font-weight:600;color:var(--blue);margin-top:4px;cursor:pointer;}
+
+/* ── Detail panel overlay ── */
+.detail-overlay{position:fixed;inset:0;background:rgba(0,0,40,.4);z-index:100;display:none;align-items:flex-start;justify-content:flex-end;}
+.detail-overlay.on{display:flex;}
+.detail-panel{width:480px;height:100vh;background:#fff;overflow-y:auto;display:flex;flex-direction:column;box-shadow:-8px 0 40px rgba(0,0,40,.15);}
+.dp-head{padding:24px 24px 16px;border-bottom:1px solid var(--g2);display:flex;align-items:flex-start;gap:12px;flex-shrink:0;}
+.dp-close{width:32px;height:32px;border-radius:50%;background:var(--g1);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;margin-left:auto;flex-shrink:0;}
+.dp-body{padding:20px 24px;flex:1;}
+.dp-section{margin-bottom:20px;}
+.dp-label{font-size:10px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.dp-card{background:var(--g1);border-radius:12px;padding:14px;}
+.dp-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--g2);}
+.dp-row:last-child{border-bottom:none;}
+.dp-key{font-size:12px;color:var(--g4);}
+.dp-val{font-size:12px;font-weight:700;color:var(--navy);}
+.proof-item{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--g2);}
+.proof-item:last-child{border-bottom:none;}
+.proof-check{width:28px;height:28px;border-radius:50%;background:rgba(0,182,122,.12);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--green);flex-shrink:0;}
+.proof-name{font-size:13px;font-weight:600;color:var(--navy);}
+.proof-date{font-size:11px;color:var(--g4);margin-top:1px;}
+.proof-hash{font-family:monospace;font-size:9px;color:var(--g3);margin-top:2px;}
+.dp-actions{padding:16px 24px;border-top:1px solid var(--g2);display:flex;gap:10px;flex-shrink:0;}
+.dp-btn{flex:1;height:44px;border-radius:22px;border:none;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;}
+.dp-btn.primary{background:var(--navy);color:#fff;}
+.dp-btn.danger{background:rgba(229,62,62,.1);color:var(--red);border:1px solid rgba(229,62,62,.2);}
+
+/* ── Empty / utility ── */
+.search-bar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:10px;background:var(--g1);border:1px solid var(--g2);flex:1;max-width:280px;}
+.search-bar input{border:none;background:transparent;font-family:var(--font);font-size:13px;color:var(--navy);flex:1;outline:none;}
+.search-bar input::placeholder{color:var(--g4);}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ── Sidebar ── -->
+<div class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo"><img src="assets/icons/icon-192.png" alt="MEA"></div>
+    <div>
+      <div class="sb-name">MEA</div>
+      <div class="sb-sub">DA Dashboard</div>
+    </div>
+  </div>
+
+  <div class="sb-section">Overview</div>
+  <div class="sb-item on" onclick="showView('cases')"><span class="ico">📋</span> Cases <span class="sb-badge">47</span></div>
+  <div class="sb-item" onclick="showView('cases')"><span class="ico">⚠️</span> Flagged <span class="sb-badge gold">6</span></div>
+  <div class="sb-item" onclick="showView('cases')"><span class="ico">📊</span> Analytics</div>
+
+  <div class="sb-section">Program</div>
+  <div class="sb-item" onclick="showView('cases')"><span class="ico">⚖️</span> Policy Rules</div>
+  <div class="sb-item" onclick="showView('cases')"><span class="ico">🔏</span> Proof Verifier</div>
+  <div class="sb-item" onclick="showView('cases')"><span class="ico">📂</span> Documents</div>
+  <div class="sb-item" onclick="showView('cases')"><span class="ico">🏢</span> Service Orgs</div>
+
+  <div class="sb-section">Admin</div>
+  <div class="sb-item" onclick="showView('cases')"><span class="ico">👥</span> Team</div>
+  <div class="sb-item" onclick="showView('cases')"><span class="ico">⚙️</span> Settings</div>
+
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="sb-avatar">👩‍⚖️</div>
+      <div>
+        <div class="sb-uname">A. Chen</div>
+        <div class="sb-urole">Suffolk County DA</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main ── -->
+<div class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="tb-left">
+      <div>
+        <div class="tb-title">Active Cases</div>
+        <div class="tb-sub">Suffolk County · EAP Diversion Program</div>
+      </div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-chip"><div class="tb-dot"></div> 47 Active Cases</div>
+      <div class="search-bar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7B84A3" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Search by name or case ID…">
+      </div>
+      <div class="tb-icon-btn notif" onclick="openDetail('alerts')">🔔<div class="notif-dot"></div></div>
+      <div class="tb-icon-btn">👩‍⚖️</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content" id="content-area">
+
+    <!-- Stat cards -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Active Cases</div>
+        <div class="stat-val">47</div>
+        <div class="stat-delta up">↑ 3 new this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">On Track</div>
+        <div class="stat-val" style="color:var(--green);">38</div>
+        <div class="stat-delta up">81% compliance rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">At Risk</div>
+        <div class="stat-val" style="color:var(--gold);">6</div>
+        <div class="stat-delta warn">⚠ Deadline within 7 days</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Completed (MTD)</div>
+        <div class="stat-val" style="color:var(--blue);">12</div>
+        <div class="stat-delta up">↑ 4 vs last month</div>
+      </div>
+    </div>
+
+    <!-- Cases table + side panels -->
+    <div class="two-col">
+      <div>
+        <div class="sec-head">
+          <div class="sec-title">Case Queue</div>
+          <div class="sec-tabs">
+            <div class="sec-tab on" onclick="filterCases(this,'all')">All</div>
+            <div class="sec-tab" onclick="filterCases(this,'risk')">At Risk</div>
+            <div class="sec-tab" onclick="filterCases(this,'done')">Completed</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Case ID</th>
+                <th>Citizen</th>
+                <th>Offense</th>
+                <th>Progress</th>
+                <th>Status</th>
+                <th>Deadline</th>
+                <th>Coach</th>
+              </tr>
+            </thead>
+            <tbody id="case-tbody">
+              <!-- Injected by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right panels -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <!-- Alerts -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">⚠️ Alerts</div>
+            <span class="badge risk">6 open</span>
+          </div>
+          <div class="panel-body" style="padding:0 20px;">
+            <div class="alert-item">
+              <div class="alert-ico r">🚨</div>
+              <div class="alert-body">
+                <div class="alert-name">Jordan M. — EAP-2026-041</div>
+                <div class="alert-desc">Missed 2 consecutive check-ins. Deadline in 4 days.</div>
+                <div class="alert-action" onclick="openDetail('EAP-2026-041')">Review case →</div>
+              </div>
+            </div>
+            <div class="alert-item">
+              <div class="alert-ico y">⏳</div>
+              <div class="alert-body">
+                <div class="alert-name">Marcus T. — EAP-2026-033</div>
+                <div class="alert-desc">Coach first-contact SLA expires in 38 hrs.</div>
+                <div class="alert-action" onclick="openDetail('EAP-2026-033')">Review case →</div>
+              </div>
+            </div>
+            <div class="alert-item">
+              <div class="alert-ico y">⏳</div>
+              <div class="alert-body">
+                <div class="alert-name">Riley K. — EAP-2026-028</div>
+                <div class="alert-desc">3 missions incomplete, deadline Apr 2.</div>
+                <div class="alert-action" onclick="openDetail('EAP-2026-028')">Review case →</div>
+              </div>
+            </div>
+            <div class="alert-item">
+              <div class="alert-ico g">✅</div>
+              <div class="alert-body">
+                <div class="alert-name">Sam R. — EAP-2026-019</div>
+                <div class="alert-desc">All 8 missions verified. Ready to close.</div>
+                <div class="alert-action" onclick="openDetail('EAP-2026-019')">Close case →</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity feed -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Recent Activity</div>
+          </div>
+          <div class="panel-body" style="padding:0 20px;">
+            <div class="activity-item">
+              <div class="act-dot g"></div>
+              <div>
+                <div class="act-text"><b>Alex P.</b> completed mission at Boys &amp; Girls Clubs (3 hrs)</div>
+                <div class="act-time">2 min ago · proof token: 9c1a…e44f</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="act-dot b"></div>
+              <div>
+                <div class="act-text"><b>Sam R.</b> completed final mission — case ready to close</div>
+                <div class="act-time">14 min ago</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="act-dot g"></div>
+              <div>
+                <div class="act-text"><b>Morgan L.</b> checked in at Franklin Park Cleanup</div>
+                <div class="act-time">1 hr ago · location verified</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="act-dot r"></div>
+              <div>
+                <div class="act-text"><b>Jordan M.</b> missed scheduled check-in at Boston Food Bank</div>
+                <div class="act-time">2 hrs ago · alert sent</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="act-dot g"></div>
+              <div>
+                <div class="act-text"><b>Casey B.</b> completed online course — Substance Awareness</div>
+                <div class="act-time">3 hrs ago</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="act-dot y"></div>
+              <div>
+                <div class="act-text"><b>Marcus T.</b> coach SLA warning — 38 hrs remaining</div>
+                <div class="act-time">5 hrs ago · auto-escalated</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- ── Case Detail Slide-over ── -->
+<div class="detail-overlay" id="detail-overlay" onclick="closeDetail(event)">
+  <div class="detail-panel" id="detail-panel">
+    <div class="dp-head">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.6px;" id="dp-id">EAP-2026-047</div>
+        <div style="font-size:20px;font-weight:800;color:var(--navy);margin-top:2px;" id="dp-name">Alex P.</div>
+        <div style="margin-top:6px;" id="dp-status-badge"><span class="badge track">● On Track</span></div>
+      </div>
+      <button class="dp-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="dp-body">
+
+      <div class="dp-section">
+        <div class="dp-label">Case Details</div>
+        <div class="dp-card">
+          <div class="dp-row"><span class="dp-key">Offense</span><span class="dp-val">Shoplifting (Class C)</span></div>
+          <div class="dp-row"><span class="dp-key">Program</span><span class="dp-val">EAP — R-2024-112</span></div>
+          <div class="dp-row"><span class="dp-key">Deal Signed</span><span class="dp-val">Jan 22, 2026</span></div>
+          <div class="dp-row"><span class="dp-key">Deadline</span><span class="dp-val">Apr 15, 2026</span></div>
+          <div class="dp-row"><span class="dp-key">Recovery Coach</span><span class="dp-val">Talan Dorwart</span></div>
+          <div class="dp-row"><span class="dp-key">Coach Contact</span><span class="dp-val" style="color:var(--blue);">Call ›</span></div>
+        </div>
+      </div>
+
+      <div class="dp-section">
+        <div class="dp-label">Program Progress</div>
+        <div class="dp-card">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
+            <span style="font-size:13px;font-weight:700;color:var(--navy);">3 of 8 missions complete</span>
+            <span style="font-size:11px;color:var(--g4);">37%</span>
+          </div>
+          <div style="height:8px;background:var(--g2);border-radius:4px;overflow:hidden;">
+            <div style="width:37%;height:100%;background:linear-gradient(90deg,#144BD8,#2D5BF7);border-radius:4px;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:8px;">
+            <span style="font-size:11px;color:var(--g4);">8h logged</span>
+            <span style="font-size:11px;color:var(--g4);">71 days remaining</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dp-section">
+        <div class="dp-label">Verified Proof Tokens</div>
+        <div class="dp-card" style="padding:0 14px;">
+          <div class="proof-item">
+            <div class="proof-check">✓</div>
+            <div style="flex:1;">
+              <div class="proof-name">Boys &amp; Girls Clubs of Boston</div>
+              <div class="proof-date">Feb 1, 2026 · 12:00–3:00 PM · 3 hrs</div>
+              <div class="proof-hash">Token: a3f9b2c8d1e4f7a0b3c6d9e2f5…c12e</div>
+            </div>
+            <span class="badge track" style="font-size:9px;">VERIFIED</span>
+          </div>
+          <div class="proof-item">
+            <div class="proof-check">✓</div>
+            <div style="flex:1;">
+              <div class="proof-name">Franklin Park Cleanup</div>
+              <div class="proof-date">Jan 25, 2026 · 9:00–11:00 AM · 2 hrs</div>
+              <div class="proof-hash">Token: 7b2d4e6f8a0c2e4g6h8i0j2k4l…f88a</div>
+            </div>
+            <span class="badge track" style="font-size:9px;">VERIFIED</span>
+          </div>
+          <div class="proof-item">
+            <div class="proof-check">✓</div>
+            <div style="flex:1;">
+              <div class="proof-name">Community Service Course</div>
+              <div class="proof-date">Jan 20, 2026 · Online · 3 hrs</div>
+              <div class="proof-hash">Token: 9c1a3e5g7i9k1m3o5q7s9u1w3y…e44f</div>
+            </div>
+            <span class="badge track" style="font-size:9px;">VERIFIED</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dp-section">
+        <div class="dp-label">Upcoming</div>
+        <div class="dp-card" style="padding:0 14px;">
+          <div class="proof-item">
+            <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,200,0,.12);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">⏳</div>
+            <div style="flex:1;">
+              <div class="proof-name">Boston Food Bank</div>
+              <div class="proof-date">Feb 8, 2026 · Scheduled</div>
+            </div>
+            <span class="badge risk" style="font-size:9px;">UPCOMING</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="dp-actions">
+      <button class="dp-btn primary" onclick="showToast('Case flagged for review')">Flag for Review</button>
+      <button class="dp-btn danger" onclick="showToast('Breach filed')">File Breach</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--navy);color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transition:all .25s;z-index:9999;pointer-events:none;white-space:nowrap;"></div>
+
+<script>
+const CASES = [
+  {id:'EAP-2026-047',name:'Alex P.',offense:'Shoplifting',prog:37,done:3,total:8,status:'track',deadline:'Apr 15',coach:'T. Dorwart'},
+  {id:'EAP-2026-046',name:'Morgan L.',offense:'Disorderly Conduct',prog:62,done:5,total:8,status:'track',deadline:'Mar 28',coach:'C. Rivera'},
+  {id:'EAP-2026-045',name:'Casey B.',offense:'Trespassing',prog:87,done:7,total:8,status:'track',deadline:'Mar 12',coach:'T. Dorwart'},
+  {id:'EAP-2026-044',name:'Jamie W.',offense:'Shoplifting',prog:25,done:2,total:8,status:'track',deadline:'Apr 22',coach:'R. Okafor'},
+  {id:'EAP-2026-041',name:'Jordan M.',offense:'Vandalism',prog:12,done:1,total:8,status:'risk',deadline:'Mar 9',coach:'C. Rivera'},
+  {id:'EAP-2026-033',name:'Marcus T.',offense:'Shoplifting',prog:0,done:0,total:8,status:'new',deadline:'Apr 30',coach:'— Unassigned'},
+  {id:'EAP-2026-028',name:'Riley K.',offense:'Disorderly Conduct',prog:62,done:5,total:8,status:'risk',deadline:'Apr 2',coach:'T. Dorwart'},
+  {id:'EAP-2026-019',name:'Sam R.',offense:'Shoplifting',prog:100,done:8,total:8,status:'done',deadline:'Apr 10',coach:'R. Okafor'},
+  {id:'EAP-2026-017',name:'Taylor N.',offense:'Trespassing',prog:100,done:8,total:8,status:'done',deadline:'Mar 5',coach:'C. Rivera'},
+  {id:'EAP-2026-011',name:'Drew H.',offense:'Vandalism',prog:50,done:4,total:8,status:'track',deadline:'Apr 18',coach:'T. Dorwart'},
+];
+
+const STATUS_LABELS = {track:'On Track',risk:'At Risk',done:'Completed',new:'New',fail:'Breach'};
+const STATUS_FILL = {track:'g',risk:'y',done:'b',new:'b',fail:'r'};
+
+let activeFilter = 'all';
+
+function renderCases(filter){
+  const tbody = document.getElementById('case-tbody');
+  const data = filter === 'all' ? CASES : CASES.filter(c => c.status === filter || (filter==='risk' && c.status==='risk'));
+  tbody.innerHTML = data.map(c => `
+    <tr onclick="openDetail('${c.id}')">
+      <td style="font-family:monospace;font-size:12px;color:var(--g4);">${c.id}</td>
+      <td style="font-weight:700;">${c.name}</td>
+      <td>${c.offense}</td>
+      <td>
+        <div class="prog-wrap">
+          <div class="prog-bar"><div class="prog-fill ${STATUS_FILL[c.status]}" style="width:${c.prog}%;"></div></div>
+          <span class="prog-pct">${c.done}/${c.total}</span>
+        </div>
+      </td>
+      <td><span class="badge ${c.status}">${STATUS_LABELS[c.status]}</span></td>
+      <td style="font-size:12px;color:var(--g4);">${c.deadline}</td>
+      <td style="font-size:12px;color:var(--g4);">${c.coach}</td>
+    </tr>
+  `).join('');
+}
+
+function filterCases(el, filter){
+  document.querySelectorAll('.sec-tab').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+  activeFilter = filter;
+  renderCases(filter === 'risk' ? 'risk' : filter === 'done' ? 'done' : 'all');
+}
+
+function openDetail(id){
+  document.getElementById('detail-overlay').classList.add('on');
+  if(id !== 'alerts'){
+    const c = CASES.find(x => x.id === id) || CASES[0];
+    document.getElementById('dp-id').textContent = c.id;
+    document.getElementById('dp-name').textContent = c.name;
+    document.getElementById('dp-status-badge').innerHTML = `<span class="badge ${c.status}">● ${STATUS_LABELS[c.status]}</span>`;
+  }
+}
+
+function closeDetail(e){
+  if(!e || e.target === document.getElementById('detail-overlay')){
+    document.getElementById('detail-overlay').classList.remove('on');
+  }
+}
+
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{
+    t.style.opacity='0';
+    t.style.transform='translateX(-50%) translateY(16px)';
+  }, 3000);
+}
+
+function showView(v){ /* future: route to different views */ }
+
+renderCases('all');
+</script>
+</body>
+</html>
