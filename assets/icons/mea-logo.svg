@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="rg" x1="0%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#40B3F5"/>
+      <stop offset="100%" stop-color="#A8E0FF"/>
+    </linearGradient>
+  </defs>
+  <!-- Left leg outer (medium blue) -->
+  <polygon points="100,28 88,42 84,164 118,164 112,42" fill="#2D7BE5"/>
+  <!-- Left fold (dark blue) -->
+  <polygon points="100,28 104,42 100,164 84,164 88,42" fill="#1A56C4"/>
+  <!-- Right leg outer (light gradient) -->
+  <polygon points="100,28 112,42 160,164 140,164 100,42" fill="url(#rg)"/>
+  <!-- Right fold highlight -->
+  <polygon points="100,28 96,42 100,164 112,164 108,42" fill="#7DCFF5"/>
+</svg>

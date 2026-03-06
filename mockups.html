@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MEA Citizen App — Feature Mockups</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#0D0D1A;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;padding:40px 20px 80px;}
+  h1{color:#fff;font-size:22px;font-weight:800;text-align:center;margin-bottom:6px;letter-spacing:-.5px;}
+  .subtitle{color:rgba(255,255,255,.45);font-size:13px;text-align:center;margin-bottom:40px;}
+
+  .grid{display:flex;flex-wrap:wrap;gap:32px;justify-content:center;}
+
+  .phone-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .label{color:rgba(255,255,255,.85);font-size:13px;font-weight:700;text-align:center;max-width:200px;line-height:1.4;}
+  .tag{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;}
+  .tag-da{background:rgba(45,91,247,.25);color:#6B8FFF;}
+  .tag-ux{background:rgba(0,182,122,.2);color:#00B67A;}
+  .tag-trust{background:rgba(255,200,0,.15);color:#FFD700;}
+
+  .phone{width:220px;height:460px;background:#00003C;border-radius:36px;overflow:hidden;position:relative;border:6px solid #1a1a2e;box-shadow:0 20px 60px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.08);}
+  .phone::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:80px;height:6px;background:#1a1a2e;border-radius:0 0 8px 8px;z-index:100;}
+
+  /* Shared design tokens */
+  --dark:#00003C;
+  --blue:#1443D9;
+  --navy:#00003C;
+  --green:#00B67A;
+
+  /* ── Utility classes matching the app ── */
+  .sb{display:flex;justify-content:space-between;align-items:center;padding:18px 16px 6px;font-size:10px;color:rgba(255,255,255,.7);flex-shrink:0;}
+  .sb-light{display:flex;justify-content:space-between;align-items:center;padding:18px 16px 6px;font-size:10px;color:rgba(0,0,30,.6);flex-shrink:0;}
+  .btn{width:100%;padding:14px;border-radius:50px;background:linear-gradient(135deg,#1443D9,#2D5BF7);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;}
+  .screen{width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;background:#00003C;}
+  .screen-light{width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;background:#F5F6FA;}
+  .scroll{flex:1;overflow-y:auto;min-height:0;}
+  .card{background:rgba(255,255,255,.07);border-radius:14px;overflow:hidden;margin:0 14px 10px;}
+  .card-light{background:#fff;border-radius:14px;overflow:hidden;margin:0 14px 10px;border:1px solid #E8EAF0;}
+  .row{display:flex;align-items:center;gap:10px;padding:12px 14px;}
+  .badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+  .badge-green{background:rgba(0,182,122,.2);color:#00B67A;}
+  .badge-blue{background:rgba(45,91,247,.2);color:#6B8FFF;}
+  .badge-red{background:rgba(255,80,80,.2);color:#FF5050;}
+  .badge-yellow{background:rgba(255,200,0,.2);color:#FFD700;}
+  .divider{height:1px;background:rgba(255,255,255,.08);margin:0 14px;}
+  .divider-light{height:1px;background:#E8EAF0;margin:0 14px;}
+  .section-title{font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;padding:14px 14px 6px;}
+  .section-title-light{font-size:11px;font-weight:700;color:#8A8FA8;text-transform:uppercase;letter-spacing:.8px;padding:14px 14px 6px;}
+  .icon-circle{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+  .progress-bar{height:6px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,#1443D9,#2D5BF7);border-radius:3px;}
+  .avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+  .nav-bar{display:flex;justify-content:space-around;padding:8px 0 4px;background:rgba(0,0,20,.95);border-top:1px solid rgba(255,255,255,.08);position:absolute;bottom:0;left:0;right:0;}
+  .nav-icon{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:18px;opacity:.4;}
+  .nav-icon.on{opacity:1;}
+  .nav-dot{width:4px;height:4px;border-radius:50%;background:#1443D9;}
+</style>
+</head>
+<body>
+
+<h1>MEA Citizen App — Feature Proposals</h1>
+<p class="subtitle">8 proposed features · Approve to build · Force-quit Safari first after approval</p>
+
+<div class="grid">
+
+  <!-- ① DEAL SUMMARY -->
+  <div class="phone-wrap">
+    <div class="tag tag-da">DA Dashboard Mirror</div>
+    <div class="label">① Diversion Deal Summary</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <!-- Hero -->
+        <div style="padding:10px 14px 14px;">
+          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Your Diversion Deal</div>
+          <div style="font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1.2;">Shoplifting<br><span style="color:rgba(255,255,255,.5);font-size:14px;font-weight:500;">Suffolk County · EAP Program</span></div>
+          <div style="margin-top:10px;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.45);margin-bottom:4px;"><span>Program Completion</span><span>3 / 8 missions</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:37%;"></div></div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <!-- Rule explanation -->
+        <div class="scroll">
+          <div class="section-title">Why You Qualified</div>
+          <div class="card" style="padding:12px 14px;">
+            <div style="font-size:12px;color:rgba(255,255,255,.75);line-height:1.6;">You qualify for EAP diversion under <span style="color:#6B8FFF;font-weight:700;">Policy Rule R-2024-112</span> because: first offense, no prior diversions, offense class C, victim consented to program.</div>
+            <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+              <span class="badge badge-green">First Offense</span>
+              <span class="badge badge-blue">Class C</span>
+              <span class="badge badge-green">No Priors</span>
+            </div>
+          </div>
+          <!-- Key terms -->
+          <div class="section-title">Deal Terms</div>
+          <div class="card">
+            <div class="row" style="border-bottom:1px solid rgba(255,255,255,.07);">
+              <div class="icon-circle" style="background:rgba(45,91,247,.2);">📋</div>
+              <div><div style="font-size:12px;font-weight:700;color:#fff;">8 Missions Required</div><div style="font-size:10px;color:rgba(255,255,255,.4);">Complete by Apr 15, 2026</div></div>
+            </div>
+            <div class="row">
+              <div class="icon-circle" style="background:rgba(0,182,122,.15);">⚖️</div>
+              <div><div style="font-size:12px;font-weight:700;color:#fff;">Charges Dismissed</div><div style="font-size:10px;color:rgba(255,255,255,.4);">Upon full completion</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-bar">
+          <div class="nav-icon on">🏠<div class="nav-dot"></div></div>
+          <div class="nav-icon">✅</div>
+          <div class="nav-icon">🗺</div>
+          <div class="nav-icon">💬</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② PROOF TOKEN HISTORY -->
+  <div class="phone-wrap">
+    <div class="tag tag-da">DA Dashboard Mirror</div>
+    <div class="label">② Proof Token History</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:10px 14px 8px;display:flex;align-items:center;gap:10px;">
+          <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:14px;">‹</div>
+          <div style="font-size:16px;font-weight:800;color:#fff;letter-spacing:-.4px;">Compliance Record</div>
+        </div>
+        <div class="scroll">
+          <div class="section-title">Verified Completions</div>
+          <!-- Token 1 -->
+          <div class="card">
+            <div class="row">
+              <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,182,122,.2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">✓</div>
+              <div style="flex:1;">
+                <div style="font-size:12px;font-weight:700;color:#fff;">BGC Boston · 3 hrs</div>
+                <div style="font-size:10px;color:rgba(255,255,255,.4);">Feb 1, 2026 · 12:00–3:00 PM</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:9px;font-weight:700;color:#00B67A;">VERIFIED</div>
+                <div style="font-size:8px;color:rgba(255,255,255,.25);font-family:monospace;margin-top:1px;">a3f9…c12e</div>
+              </div>
+            </div>
+          </div>
+          <!-- Token 2 -->
+          <div class="card">
+            <div class="row">
+              <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,182,122,.2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">✓</div>
+              <div style="flex:1;">
+                <div style="font-size:12px;font-weight:700;color:#fff;">Franklin Park · 2 hrs</div>
+                <div style="font-size:10px;color:rgba(255,255,255,.4);">Jan 25, 2026 · 9:00–11:00 AM</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:9px;font-weight:700;color:#00B67A;">VERIFIED</div>
+                <div style="font-size:8px;color:rgba(255,255,255,.25);font-family:monospace;margin-top:1px;">7b2d…f88a</div>
+              </div>
+            </div>
+          </div>
+          <!-- Token 3 pending -->
+          <div class="card" style="opacity:.5;">
+            <div class="row">
+              <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,200,0,.15);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">⏳</div>
+              <div style="flex:1;">
+                <div style="font-size:12px;font-weight:700;color:#fff;">Boston Food Bank · 3 hrs</div>
+                <div style="font-size:10px;color:rgba(255,255,255,.4);">Feb 8, 2026 · Scheduled</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:9px;font-weight:700;color:#FFD700;">UPCOMING</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:10px 14px;"><div style="font-size:11px;color:rgba(255,255,255,.3);line-height:1.5;">Each record is cryptographically signed and tamper-resistant. Your DA can verify these independently.</div></div>
+        </div>
+        <div class="nav-bar">
+          <div class="nav-icon on">🏠<div class="nav-dot"></div></div>
+          <div class="nav-icon">✅</div>
+          <div class="nav-icon">🗺</div>
+          <div class="nav-icon">💬</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ SLA COUNTDOWN -->
+  <div class="phone-wrap">
+    <div class="tag tag-da">DA Dashboard Mirror</div>
+    <div class="label">③ Recovery Coach SLA Timer</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:10px 14px 12px;">
+          <div style="font-size:16px;font-weight:800;color:#fff;letter-spacing:-.4px;">Hi Marcus 👋</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:2px;">Your recovery coach will contact you soon</div>
+        </div>
+        <!-- SLA banner -->
+        <div style="margin:0 14px 12px;background:linear-gradient(135deg,rgba(255,200,0,.15),rgba(255,150,0,.1));border:1px solid rgba(255,200,0,.25);border-radius:14px;padding:14px;">
+          <div style="font-size:10px;font-weight:700;color:#FFD700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">First Contact Window</div>
+          <div style="display:flex;align-items:baseline;gap:6px;">
+            <div style="font-size:36px;font-weight:800;color:#fff;letter-spacing:-2px;font-variant-numeric:tabular-nums;">41:22</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.45);">hrs remaining</div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.4);margin-bottom:4px;"><span>0h</span><span>72hr SLA</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:43%;background:linear-gradient(90deg,#FFD700,#FF9500);"></div></div>
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:8px;">Coach Talan Dorwart is assigned to your case. If no contact by deadline, the DA's office is automatically notified.</div>
+        </div>
+        <!-- Coach card -->
+        <div class="card">
+          <div class="row">
+            <img class="avatar" src="https://i.pravatar.cc/64?img=47" style="width:38px;height:38px;">
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:700;color:#fff;">Talan Dorwart</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.4);">Recovery Coach · EAP</div>
+            </div>
+            <div style="width:34px;height:34px;border-radius:50%;background:rgba(0,182,122,.2);display:flex;align-items:center;justify-content:center;font-size:16px;">📞</div>
+          </div>
+        </div>
+        <div class="nav-bar">
+          <div class="nav-icon on">🏠<div class="nav-dot"></div></div>
+          <div class="nav-icon">✅</div>
+          <div class="nav-icon">🗺</div>
+          <div class="nav-icon">💬</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ PUSH NOTIFICATIONS -->
+  <div class="phone-wrap">
+    <div class="tag tag-ux">UX Enhancement</div>
+    <div class="label">④ Push Notification Opt-In</div>
+    <div class="phone">
+      <div class="screen-light" style="background:#F5F6FA;">
+        <div class="sb-light"><span>9:41</span><span style="color:#333;">●●●</span></div>
+        <div style="padding:20px 20px 0;text-align:center;">
+          <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#1443D9,#2D5BF7);display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px;">🔔</div>
+          <div style="font-size:20px;font-weight:800;color:#00003C;letter-spacing:-.5px;">Stay on track</div>
+          <div style="font-size:13px;color:#8A8FA8;margin-top:8px;line-height:1.6;">Get reminders before each session, alerts when your coach messages you, and deadline warnings.</div>
+        </div>
+        <!-- Sample notification previews -->
+        <div style="margin:20px 16px 0;display:flex;flex-direction:column;gap:8px;">
+          <div style="background:#fff;border-radius:14px;padding:12px 14px;border:1px solid #E8EAF0;display:flex;gap:10px;align-items:flex-start;">
+            <div style="width:32px;height:32px;background:linear-gradient(135deg,#1443D9,#2D5BF7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">MEA</div>
+            <div><div style="font-size:12px;font-weight:700;color:#00003C;">Tomorrow: BGC Boston · 12pm</div><div style="font-size:11px;color:#8A8FA8;margin-top:1px;">Check in by scanning QR at lobby desk</div></div>
+          </div>
+          <div style="background:#fff;border-radius:14px;padding:12px 14px;border:1px solid #E8EAF0;display:flex;gap:10px;align-items:flex-start;">
+            <div style="width:32px;height:32px;background:linear-gradient(135deg,#1443D9,#2D5BF7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">MEA</div>
+            <div><div style="font-size:12px;font-weight:700;color:#00003C;">Talan sent you a message</div><div style="font-size:11px;color:#8A8FA8;margin-top:1px;">"See you at the lobby at 12!"</div></div>
+          </div>
+          <div style="background:#fff;border-radius:14px;padding:12px 14px;border:1px solid rgba(255,80,80,.15);display:flex;gap:10px;align-items:flex-start;">
+            <div style="width:32px;height:32px;background:linear-gradient(135deg,#FF5050,#FF3030);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">⚠️</div>
+            <div><div style="font-size:12px;font-weight:700;color:#FF5050;">Deadline in 48 hours</div><div style="font-size:11px;color:#8A8FA8;margin-top:1px;">5 missions remain · Apr 15 cutoff</div></div>
+          </div>
+        </div>
+        <div style="padding:16px;">
+          <button class="btn">Enable Notifications</button>
+          <div style="text-align:center;margin-top:10px;font-size:12px;color:#8A8FA8;">Not now</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑤ DOCUMENT VAULT -->
+  <div class="phone-wrap">
+    <div class="tag tag-ux">UX Enhancement</div>
+    <div class="label">⑤ Document Vault</div>
+    <div class="phone">
+      <div class="screen-light" style="background:#F5F6FA;">
+        <div class="sb-light"><span>9:41</span><span style="color:#333;">●●●</span></div>
+        <div style="padding:10px 16px 12px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:18px;font-weight:800;color:#00003C;letter-spacing:-.4px;">My Documents</div>
+          <div style="width:28px;height:28px;border-radius:50%;background:#E8EAF0;display:flex;align-items:center;justify-content:center;font-size:14px;">＋</div>
+        </div>
+        <div style="overflow-y:auto;padding:0 16px;display:flex;flex-direction:column;gap:10px;">
+          <!-- Doc 1 -->
+          <div style="background:#fff;border-radius:14px;padding:14px;border:1px solid #E8EAF0;display:flex;gap:12px;align-items:center;">
+            <div style="width:42px;height:50px;background:linear-gradient(135deg,#1443D9,#2D5BF7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📄</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:700;color:#00003C;">Citation Notice</div>
+              <div style="font-size:11px;color:#8A8FA8;margin-top:1px;">Jan 20, 2026 · Suffolk County</div>
+              <span style="background:rgba(45,91,247,.1);color:#1443D9;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;">OFFICIAL</span>
+            </div>
+            <div style="font-size:18px;opacity:.4;">↓</div>
+          </div>
+          <!-- Doc 2 -->
+          <div style="background:#fff;border-radius:14px;padding:14px;border:1px solid #E8EAF0;display:flex;gap:12px;align-items:center;">
+            <div style="width:42px;height:50px;background:linear-gradient(135deg,#00B67A,#009960);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">✍️</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:700;color:#00003C;">Diversion Agreement</div>
+              <div style="font-size:11px;color:#8A8FA8;margin-top:1px;">Signed Jan 22, 2026</div>
+              <span style="background:rgba(0,182,122,.12);color:#00B67A;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;">SIGNED</span>
+            </div>
+            <div style="font-size:18px;opacity:.4;">↓</div>
+          </div>
+          <!-- Doc 3 -->
+          <div style="background:#fff;border-radius:14px;padding:14px;border:1px solid #E8EAF0;display:flex;gap:12px;align-items:center;opacity:.5;">
+            <div style="width:42px;height:50px;background:linear-gradient(135deg,#FFD700,#FFA500);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏆</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:700;color:#00003C;">Completion Certificate</div>
+              <div style="font-size:11px;color:#8A8FA8;margin-top:1px;">Available upon completion</div>
+              <span style="background:rgba(255,200,0,.15);color:#FFA500;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;">PENDING</span>
+            </div>
+            <div style="font-size:18px;opacity:.4;">🔒</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ REWARDS / MISSIONS EARNED -->
+  <div class="phone-wrap">
+    <div class="tag tag-ux">UX Enhancement</div>
+    <div class="label">⑥ Mission Rewards Tracker</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:8px 14px 10px;">
+          <div style="font-size:16px;font-weight:800;color:#fff;letter-spacing:-.4px;">Your Progress</div>
+        </div>
+        <!-- Big score -->
+        <div style="margin:0 14px 12px;background:linear-gradient(135deg,rgba(20,67,217,.5),rgba(45,91,247,.3));border-radius:18px;padding:18px;text-align:center;border:1px solid rgba(45,91,247,.4);">
+          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">MEA Points Earned</div>
+          <div style="font-size:52px;font-weight:800;color:#fff;letter-spacing:-2px;line-height:1;">1,250</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:4px;">350 pts until next milestone</div>
+          <div style="margin-top:10px;" class="progress-bar"><div class="progress-fill" style="width:78%;"></div></div>
+        </div>
+        <!-- Earned badges -->
+        <div class="section-title">Earned Badges</div>
+        <div style="display:flex;gap:8px;padding:0 14px;overflow-x:auto;">
+          <div style="flex-shrink:0;text-align:center;">
+            <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#FFD700,#FFA500);display:flex;align-items:center;justify-content:center;font-size:24px;">🏃</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:4px;width:48px;">Fast Start</div>
+          </div>
+          <div style="flex-shrink:0;text-align:center;">
+            <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#00B67A,#009960);display:flex;align-items:center;justify-content:center;font-size:24px;">🌱</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:4px;width:48px;">Community</div>
+          </div>
+          <div style="flex-shrink:0;text-align:center;opacity:.4;">
+            <div style="width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:24px;">🎓</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:4px;width:48px;">Scholar</div>
+          </div>
+          <div style="flex-shrink:0;text-align:center;opacity:.4;">
+            <div style="width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:24px;">⭐</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:4px;width:48px;">All-Star</div>
+          </div>
+        </div>
+        <!-- Recent -->
+        <div class="section-title">Recent Activity</div>
+        <div class="card" style="margin-bottom:0;">
+          <div class="row" style="border-bottom:1px solid rgba(255,255,255,.07);">
+            <div style="font-size:16px;">✅</div>
+            <div style="flex:1;font-size:12px;color:rgba(255,255,255,.8);">BGC Boston check-out</div>
+            <div style="font-size:12px;font-weight:700;color:#00B67A;">+300 pts</div>
+          </div>
+          <div class="row">
+            <div style="font-size:16px;">📚</div>
+            <div style="flex:1;font-size:12px;color:rgba(255,255,255,.8);">Community Service course</div>
+            <div style="font-size:12px;font-weight:700;color:#00B67A;">+150 pts</div>
+          </div>
+        </div>
+        <div class="nav-bar">
+          <div class="nav-icon on">🏠<div class="nav-dot"></div></div>
+          <div class="nav-icon">✅</div>
+          <div class="nav-icon">🗺</div>
+          <div class="nav-icon">💬</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ POLICY EXPLANATION -->
+  <div class="phone-wrap">
+    <div class="tag tag-trust">Trust & Transparency</div>
+    <div class="label">⑦ Policy Explanation Screen</div>
+    <div class="phone">
+      <div class="screen-light" style="background:#F5F6FA;">
+        <div class="sb-light"><span>9:41</span><span style="color:#333;">●●●</span></div>
+        <div style="padding:10px 16px 10px;display:flex;align-items:center;gap:10px;">
+          <div style="width:28px;height:28px;border-radius:50%;background:#E8EAF0;display:flex;align-items:center;justify-content:center;font-size:14px;">‹</div>
+          <div style="font-size:16px;font-weight:800;color:#00003C;letter-spacing:-.4px;">Why You Were Offered This</div>
+        </div>
+        <div style="overflow-y:auto;padding:0 16px;display:flex;flex-direction:column;gap:10px;">
+          <!-- Rule header -->
+          <div style="background:linear-gradient(135deg,#00003C,#1443D9);border-radius:16px;padding:16px;color:#fff;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.8px;opacity:.6;text-transform:uppercase;margin-bottom:4px;">Applied Rule</div>
+            <div style="font-size:15px;font-weight:800;">EAP Policy R-2024-112</div>
+            <div style="font-size:11px;opacity:.6;margin-top:2px;">Suffolk County · Emerging Adult Program</div>
+            <div style="margin-top:10px;font-size:11px;opacity:.75;line-height:1.5;">This rule was in effect on Jan 20, 2026 at the time of your encounter. It cannot be retroactively changed.</div>
+          </div>
+          <!-- Checklist -->
+          <div style="background:#fff;border-radius:14px;padding:14px;border:1px solid #E8EAF0;">
+            <div style="font-size:12px;font-weight:700;color:#00003C;margin-bottom:10px;">Eligibility Criteria Met</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#333;"><span style="color:#00B67A;font-weight:700;flex-shrink:0;">✓</span>Age 18–25 (Emerging Adult)</div>
+              <div style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#333;"><span style="color:#00B67A;font-weight:700;flex-shrink:0;">✓</span>No prior diversions in system</div>
+              <div style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#333;"><span style="color:#00B67A;font-weight:700;flex-shrink:0;">✓</span>Offense class C or below</div>
+              <div style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#333;"><span style="color:#00B67A;font-weight:700;flex-shrink:0;">✓</span>Program capacity available</div>
+              <div style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#333;"><span style="color:#00B67A;font-weight:700;flex-shrink:0;">✓</span>Victim did not object</div>
+            </div>
+          </div>
+          <!-- Note -->
+          <div style="background:rgba(45,91,247,.06);border-radius:14px;padding:14px;border:1px solid rgba(45,91,247,.15);">
+            <div style="font-size:11px;color:#1443D9;font-weight:700;margin-bottom:4px;">No Risk Score Was Used</div>
+            <div style="font-size:11px;color:#555;line-height:1.6;">This decision was made using deterministic policy rules only — not an AI model or risk assessment. You were not scored.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑧ CAPACITY INDICATOR -->
+  <div class="phone-wrap">
+    <div class="tag tag-trust">Trust & Transparency</div>
+    <div class="label">⑧ Program Capacity Indicator</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="sb"><span>9:41</span><span>●●●</span></div>
+        <div style="padding:8px 14px 6px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:16px;font-weight:800;color:#fff;letter-spacing:-.4px;">Available Tasks</div>
+          <div style="font-size:22px;opacity:.6;">⚙</div>
+        </div>
+        <div style="overflow-y:auto;flex:1;min-height:0;">
+          <!-- Task 1 - limited spots -->
+          <div style="margin:0 14px 10px;background:rgba(255,255,255,.07);border-radius:14px;overflow:hidden;">
+            <div style="height:70px;background:url('https://report.bgcb.org/wp-content/uploads/2026/03/Untitled-design-62.png') center/cover;position:relative;">
+              <div style="position:absolute;inset:0;background:rgba(0,0,20,.4);"></div>
+              <div style="position:absolute;top:7px;right:8px;background:rgba(255,80,80,.9);border-radius:20px;padding:3px 8px;font-size:9px;font-weight:700;color:#fff;">2 spots left this week</div>
+            </div>
+            <div style="padding:10px 12px;">
+              <div style="font-size:13px;font-weight:700;color:#fff;">Boys &amp; Girls Clubs</div>
+              <div style="display:flex;gap:6px;margin-top:5px;align-items:center;">
+                <span class="badge badge-blue">3 hrs</span>
+                <div style="flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:2px;"><div style="width:85%;height:100%;background:linear-gradient(90deg,#FF5050,#FF8C00);border-radius:2px;"></div></div>
+                <span style="font-size:9px;color:rgba(255,255,255,.4);">85% full</span>
+              </div>
+            </div>
+          </div>
+          <!-- Task 2 - open -->
+          <div style="margin:0 14px 10px;background:rgba(255,255,255,.07);border-radius:14px;overflow:hidden;">
+            <div style="height:70px;background:url('https://thetrustees.org/wp-content/uploads/2020/07/Greenwood-Community-Garden.jpg') center/cover;position:relative;">
+              <div style="position:absolute;inset:0;background:rgba(0,0,20,.35);"></div>
+              <div style="position:absolute;top:7px;right:8px;background:rgba(0,182,122,.9);border-radius:20px;padding:3px 8px;font-size:9px;font-weight:700;color:#fff;">Spots available</div>
+            </div>
+            <div style="padding:10px 12px;">
+              <div style="font-size:13px;font-weight:700;color:#fff;">Dorchester Garden</div>
+              <div style="display:flex;gap:6px;margin-top:5px;align-items:center;">
+                <span class="badge badge-blue">2 hrs</span>
+                <div style="flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:2px;"><div style="width:30%;height:100%;background:linear-gradient(90deg,#1443D9,#2D5BF7);border-radius:2px;"></div></div>
+                <span style="font-size:9px;color:rgba(255,255,255,.4);">30% full</span>
+              </div>
+            </div>
+          </div>
+          <!-- Task 3 - full -->
+          <div style="margin:0 14px 10px;background:rgba(255,255,255,.04);border-radius:14px;overflow:hidden;opacity:.6;">
+            <div style="height:70px;background:url('https://www.gbfb.org/wp-content/uploads/2021/02/gbfbcovid_wh_0377-470x300.jpg') center/cover;position:relative;">
+              <div style="position:absolute;inset:0;background:rgba(0,0,20,.55);"></div>
+              <div style="position:absolute;top:7px;right:8px;background:rgba(100,100,120,.9);border-radius:20px;padding:3px 8px;font-size:9px;font-weight:700;color:#fff;">Full this week</div>
+            </div>
+            <div style="padding:10px 12px;">
+              <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.6);">Boston Food Bank</div>
+              <div style="display:flex;gap:6px;margin-top:5px;align-items:center;">
+                <span class="badge" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.4);">3 hrs</span>
+                <div style="flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:2px;"><div style="width:100%;height:100%;background:rgba(255,255,255,.2);border-radius:2px;"></div></div>
+                <span style="font-size:9px;color:rgba(255,255,255,.3);">Full</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-bar">
+          <div class="nav-icon">🏠</div>
+          <div class="nav-icon on">✅<div class="nav-dot"></div></div>
+          <div class="nav-icon">🗺</div>
+          <div class="nav-icon">💬</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /grid -->
+</body>
+</html>

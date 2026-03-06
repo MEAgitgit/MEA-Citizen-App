@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MEA">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<title>MEA</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+:root{
+  --dark:#060A1E;
+  --dark2:#0A0F30;
+  --card-dark:#0F1540;
+  --navy:#00003C;
+  --blue:#144BD8;
+  --blue2:#2D5BF7;
+  --blue-grad:linear-gradient(160deg,#2D5BF7 0%,#144BD8 100%);
+  --white:#fff;
+  --off:#F4F6FF;
+  --g1:#F0F2FA;
+  --g2:#E2E6F3;
+  --g3:#B8BFD8;
+  --g4:#7B84A3;
+  --green:#00B67A;
+  --orange:#E8744F;
+  --font:'Plus Jakarta Sans',sans-serif;
+  --body:'Inter',sans-serif;
+  --st:env(safe-area-inset-top,0px);
+  --sb:env(safe-area-inset-bottom,0px);
+  --tab-h:0px;
+}
+html,body{height:100%;height:-webkit-fill-available;background:#000;font-family:var(--font);-webkit-font-smoothing:antialiased;overflow:hidden;}
+[onclick],[role=button]{cursor:pointer;}
+
+/* ── App shell ── */
+#app{position:relative;width:100%;max-width:430px;height:100vh;height:100svh;margin:0 auto;overflow:hidden;background:var(--dark);}
+@media(min-width:500px){
+  body{display:flex;align-items:center;justify-content:center;background:#02040F;}
+  #app{height:min(932px,100svh);border-radius:48px;box-shadow:0 0 0 12px #111,0 40px 80px rgba(0,0,0,.8);}
+}
+
+/* ── Screen system ── */
+.s{position:absolute;top:0;left:0;right:0;bottom:var(--tab-h);display:none;flex-direction:column;overflow:hidden;}
+.s.on{display:flex;}
+.s.in{animation:sIn .28s cubic-bezier(.4,0,.2,1) forwards;}
+.s.back{animation:sBack .28s cubic-bezier(.4,0,.2,1) forwards;}
+@keyframes sIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@keyframes sBack{from{transform:translateX(-24%)}to{transform:translateX(0)}}
+
+/* ── Scroll ── */
+.scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;}
+.scroll::-webkit-scrollbar{display:none;}
+
+/* ── Status bar (fake, dark screens) ── */
+.sb-dark{height:calc(50px + var(--st));padding-top:var(--st);display:flex;align-items:flex-end;justify-content:space-between;padding:var(--st) 20px 6px;flex-shrink:0;color:#fff;font-size:15px;font-weight:600;}
+.sb-light{height:calc(50px + var(--st));padding-top:var(--st);display:flex;align-items:flex-end;justify-content:space-between;padding:var(--st) 20px 6px;flex-shrink:0;color:#000;font-size:15px;font-weight:600;}
+.sb-icons{display:flex;gap:5px;align-items:center;}
+
+/* ── Top nav bar (dashboard) ── */
+.top-nav{display:flex;align-items:center;justify-content:space-between;padding:0 20px 14px;flex-shrink:0;}
+.top-nav .mea{font-family:var(--font);font-size:22px;font-weight:800;color:var(--blue);letter-spacing:-.5px;}
+.nav-icon-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.08);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.nav-icon-btn svg{width:20px;height:20px;}
+.nav-group{display:flex;gap:8px;}
+
+/* ── Back nav (light screens) ── */
+.light-nav{display:flex;align-items:center;gap:12px;padding:8px 20px 14px;flex-shrink:0;}
+.back-circle{width:36px;height:36px;border-radius:50%;background:var(--g1);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.light-nav h2{font-size:17px;font-weight:700;color:var(--navy);}
+
+/* ── Primary button (blue gradient pill) ── */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:62px;border-radius:31px;border:none;background:var(--blue-grad);color:#fff;font-family:var(--font);font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 8px 28px rgba(20,75,216,.35);transition:transform .12s,opacity .12s;}
+.btn:active{transform:scale(.97);opacity:.9;}
+.btn-sm{height:50px;border-radius:25px;font-size:16px;}
+.btn-outline{background:transparent;border:1.5px solid rgba(255,255,255,.3);color:rgba(255,255,255,.85);box-shadow:none;}
+.btn-dark{background:var(--navy);box-shadow:none;}
+.btn-ghost{background:none;border:none;color:rgba(255,255,255,.55);font-size:15px;width:auto;height:auto;padding:10px 0;}
+
+/* ── Pill buttons (partial-width, centered) ── */
+.pill-wrap{display:flex;justify-content:center;padding:0 20px;}
+.pill-wrap .btn{max-width:240px;}
+
+/* ── OTP / Citation tiles ── */
+.otp-row{display:flex;gap:8px;padding:0 24px;justify-content:center;}
+.otp-box{flex:1;max-width:54px;height:80px;border-radius:12px;background:#F0F2FA;border:1.5px solid var(--g2);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:36px;font-weight:600;color:var(--navy);transition:border-color .15s;}
+.otp-box.filled{background:#fff;border-color:var(--blue);}
+.otp-box.active{border-color:var(--blue);background:#fff;}
+
+/* ── Numpad ── */
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px 20px calc(var(--sb)+16px);flex-shrink:0;background:#fff;}
+.num-key{height:64px;border-radius:12px;background:#F9FAFB;border:none;font-family:var(--font);font-size:26px;font-weight:500;color:#000;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 1px 0 rgba(0,0,0,.18);transition:background .1s;}
+.num-key:active{background:#D4D6DC;}
+.num-key .sub{font-size:9px;font-weight:700;letter-spacing:.8px;color:#666;margin-top:-2px;}
+.num-key.del{background:#F9FAFB;font-size:18px;}
+.num-key.empty{background:transparent;box-shadow:none;}
+
+/* ── Language option buttons ── */
+.lang-btn{width:100%;height:58px;border-radius:29px;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#fff;font-family:var(--font);font-size:18px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.lang-btn:active{background:rgba(255,255,255,.14);}
+
+/* ── Case progress card ── */
+.case-card{background:linear-gradient(160deg,#151945 0%,#0C1238 100%);border-radius:20px;padding:18px 20px;margin:0 16px 0;position:relative;overflow:hidden;}
+.case-card::before{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.04);}
+.case-card-top{display:flex;align-items:center;gap:12px;}
+.case-icon{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.case-title{font-family:var(--font);font-size:20px;font-weight:800;color:#fff;letter-spacing:-.4px;}
+.case-sub{font-size:13px;color:rgba(255,255,255,.5);margin-top:2px;}
+.case-bar-track{height:5px;border-radius:3px;background:rgba(255,255,255,.12);margin-top:14px;overflow:hidden;}
+.case-bar-fill{height:100%;border-radius:3px;background:var(--blue2);}
+.case-dots{display:flex;gap:6px;justify-content:center;margin-top:12px;}
+.case-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25);}
+.case-dot.on{background:#fff;width:18px;border-radius:4px;}
+
+/* ── Location pill ── */
+.loc-pill{display:flex;align-items:center;gap:8px;margin:10px 16px 0;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.06);font-size:13px;color:rgba(255,255,255,.65);cursor:pointer;}
+.loc-dot{width:8px;height:8px;border-radius:50%;background:var(--g3);flex-shrink:0;}
+.loc-dot.active{background:var(--green);}
+
+/* ── Task card (home) ── */
+.task-card-home{background:#fff;border-radius:16px;margin:10px 16px 0;overflow:hidden;cursor:pointer;}
+.task-card-home .photo{height:130px;background:linear-gradient(160deg,#2A5298,#1A3575);display:flex;align-items:center;justify-content:center;font-size:42px;position:relative;}
+.task-card-home .photo img{width:100%;height:100%;object-fit:cover;}
+.task-card-home .body{padding:12px 14px 14px;display:flex;align-items:center;justify-content:space-between;}
+.task-card-home .info .name{font-family:var(--font);font-size:15px;font-weight:700;color:var(--navy);}
+.task-card-home .info .time{font-size:13px;color:var(--g4);margin-top:2px;}
+.task-card-home .checkin-btn{background:var(--navy);color:#fff;border:none;border-radius:20px;padding:10px 18px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;}
+
+/* ── Section header ── */
+.section-row{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px;}
+.section-title{font-family:var(--font);font-size:17px;font-weight:700;color:#fff;}
+.section-title.dark{color:var(--navy);}
+.section-plus{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.section-plus.dark{background:var(--g1);color:var(--navy);}
+
+/* ── Upcoming task mini cards ── */
+.upcoming-row{display:flex;gap:10px;padding:0 16px;overflow-x:auto;}
+.upcoming-row::-webkit-scrollbar{display:none;}
+.upcoming-card{min-width:155px;background:rgba(255,255,255,.07);border-radius:14px;overflow:hidden;cursor:pointer;flex-shrink:0;}
+.upcoming-card .up-photo{height:90px;background:linear-gradient(160deg,#1A4060,#0D2840);display:flex;align-items:center;justify-content:center;font-size:28px;position:relative;}
+.upcoming-card .up-photo img{width:100%;height:100%;object-fit:cover;}
+.upcoming-card .hours-badge{position:absolute;top:8px;left:8px;background:var(--blue);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:8px;}
+.upcoming-card .up-body{padding:8px 10px 10px;}
+.upcoming-card .up-name{font-size:13px;font-weight:700;color:#fff;line-height:1.3;}
+.upcoming-card .up-time{font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;}
+
+/* ── Course cards ── */
+.courses-row{display:flex;gap:10px;padding:0 16px;}
+.course-card{flex:1;min-width:0;background:rgba(255,255,255,.07);border-radius:14px;overflow:hidden;cursor:pointer;}
+.course-card .c-photo{height:100px;position:relative;display:flex;align-items:flex-end;padding:8px;}
+.course-card .c-photo.p1{background:linear-gradient(160deg,#1B3A5C,#0E1F38);}
+.course-card .c-photo.p2{background:linear-gradient(160deg,#3D1A5C,#1A0B2E);}
+.course-card .c-title{font-size:12px;font-weight:700;color:#fff;line-height:1.3;}
+
+/* ── Available task list ── */
+.task-list-item{display:flex;gap:14px;padding:14px 16px;border-bottom:1px solid var(--g2);cursor:pointer;background:#fff;}
+.task-list-item:last-child{border-bottom:none;}
+.task-list-item:active{background:var(--g1);}
+.tli-photo{width:70px;height:70px;border-radius:12px;background:linear-gradient(160deg,#2A5298,#1A3575);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:26px;}
+.tli-photo img{width:100%;height:100%;object-fit:cover;}
+.tli-info{flex:1;min-width:0;}
+.tli-name{font-family:var(--font);font-size:15px;font-weight:700;color:var(--navy);}
+.tli-desc{font-size:13px;color:var(--g4);margin-top:3px;line-height:1.4;}
+.tli-dist{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-size:12px;font-weight:600;color:var(--blue);}
+
+/* ── Task detail ── */
+.td-photo{height:220px;position:relative;display:flex;align-items:flex-end;padding:16px;background:linear-gradient(160deg,#1E4A8A,#0A1F45);}
+.td-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.td-photo-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,40,.8),transparent);}
+.td-photo-content{position:relative;z-index:2;}
+.td-name{font-family:var(--font);font-size:24px;font-weight:800;color:#fff;letter-spacing:-.5px;}
+.td-sub{font-size:14px;color:rgba(255,255,255,.7);margin-top:4px;}
+.td-dist{display:inline-flex;align-items:center;gap:4px;margin-top:8px;background:rgba(255,255,255,.15);padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;color:#fff;}
+
+.supervisor-card{margin:16px;background:var(--g1);border-radius:14px;padding:14px;display:flex;gap:12px;}
+.sup-avatar{width:40px;height:40px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.sup-text{font-size:13px;color:var(--navy);line-height:1.5;}
+.sup-name{font-size:12px;font-weight:600;color:var(--g4);margin-top:4px;}
+
+.capabilities-row{display:flex;gap:10px;padding:0 16px;margin-top:4px;}
+.cap-chip{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;background:var(--g1);font-size:13px;font-weight:600;color:var(--navy);}
+
+/* ── Calendar ── */
+.cal-header{display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;}
+.cal-month{font-family:var(--font);font-size:18px;font-weight:700;color:var(--navy);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;gap:2px;padding:0 12px;}
+.cal-dow{font-size:12px;font-weight:600;color:var(--g4);padding:6px 0;}
+.cal-day{height:40px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;color:var(--navy);border-radius:50%;cursor:pointer;}
+.cal-day.avail{font-weight:700;}
+.cal-day.avail:active{background:var(--g1);}
+.cal-day.selected{background:var(--navy);color:#fff;}
+.cal-day.dim{color:var(--g3);}
+.time-slots{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px;}
+.time-slot{height:48px;border-radius:24px;border:1.5px solid var(--g2);background:#fff;font-size:15px;font-weight:600;color:var(--navy);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s,border-color .15s;}
+.time-slot.selected{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+/* ── Booking confirmed ── */
+.booking-photo{height:220px;border-radius:16px;overflow:hidden;margin:20px 16px 0;background:linear-gradient(160deg,#1E4A8A,#0A1F45);display:flex;align-items:center;justify-content:center;font-size:60px;position:relative;}
+.booking-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+
+/* ── Check-in modal ── */
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,20,.75);z-index:800;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;}
+.modal-sheet{background:#fff;border-radius:24px 24px 0 0;width:100%;padding-bottom:calc(20px + var(--sb));animation:sheetUp .3s cubic-bezier(.4,0,.2,1);}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;border-radius:2px;background:var(--g2);margin:10px auto 4px;}
+.modal-title-dark{font-family:var(--font);font-size:18px;font-weight:700;color:var(--blue);text-align:center;padding:8px 20px 0;}
+.modal-title-out{font-family:var(--font);font-size:18px;font-weight:700;color:var(--orange);text-align:center;padding:8px 20px 0;}
+.modal-close{position:absolute;right:16px;top:16px;width:34px;height:34px;border-radius:50%;background:var(--g1);border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+
+/* ── CI/CO Tabs ── */
+.ci-tabs{display:flex;gap:8px;padding:12px 16px 0;}
+.ci-tab{flex:1;height:42px;border-radius:10px;border:none;background:var(--g1);font-size:13px;font-weight:700;color:var(--g4);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;position:relative;transition:background .15s;}
+.ci-tab.on{background:var(--navy);color:#fff;}
+.tab-badge{position:absolute;top:-6px;right:-6px;font-size:9px;font-weight:800;padding:2px 5px;border-radius:6px;background:var(--g3);color:#fff;}
+.tab-badge.pass{background:var(--green);}
+
+/* ── Attestation + Signature ── */
+.attest-text{font-size:13px;color:var(--g4);text-align:center;padding:14px 20px 10px;line-height:1.5;}
+.sig-area{margin:0 20px;height:160px;border-radius:14px;border:1.5px dashed var(--g2);background:var(--g1);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden;}
+.sig-hint{font-size:15px;color:var(--g3);font-weight:500;}
+canvas.sig-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;}
+
+/* ── Location illustration ── */
+.loc-illus{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px 16px;gap:14px;}
+.loc-circle{width:100px;height:100px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:44px;}
+.loc-title{font-family:var(--font);font-size:20px;font-weight:700;color:var(--navy);text-align:center;}
+.loc-sub{font-size:13px;color:var(--g4);text-align:center;max-width:280px;line-height:1.5;}
+
+/* ── Timer card ── */
+.timer-card{background:#fff;border-radius:16px;margin:10px 16px 0;overflow:hidden;}
+.timer-card .t-photo{height:130px;background:linear-gradient(160deg,#2A5298,#1A3575);display:flex;align-items:center;justify-content:center;font-size:42px;}
+.timer-card .t-body{padding:14px;}
+.timer-card .t-name{font-family:var(--font);font-size:16px;font-weight:700;color:var(--navy);}
+.timer-card .t-desc{font-size:13px;color:var(--g4);margin-top:2px;}
+.timer-card .t-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:14px;}
+.timer-val{font-family:var(--font);font-size:36px;font-weight:800;color:var(--navy);letter-spacing:-.5px;}
+.timer-label{font-size:12px;color:var(--g4);font-weight:500;margin-top:2px;}
+.checkout-btn{background:var(--navy);color:#fff;border:none;border-radius:22px;padding:12px 22px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;}
+
+/* ── Chats ── */
+.chat-thread-item{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--g1);cursor:pointer;}
+.chat-thread-item:active{background:var(--g1);}
+.ct-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#2D5BF7,#144BD8);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.ct-info{flex:1;min-width:0;}
+.ct-name{font-size:15px;font-weight:700;color:var(--navy);}
+.ct-preview{font-size:13px;color:var(--g4);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ct-time{font-size:12px;color:var(--g3);flex-shrink:0;text-align:right;}
+.ct-badge{width:20px;height:20px;border-radius:50%;background:#E53E3E;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:4px;align-self:flex-start;}
+
+/* ── Chat thread ── */
+.bubble-wrap{display:flex;flex-direction:column;margin-bottom:10px;}
+.bubble-wrap.me{align-items:flex-end;}
+.bubble-wrap.them{align-items:flex-start;flex-direction:row;gap:8px;align-items:flex-end;}
+.bubble{max-width:72%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.5;}
+.bubble.me{background:var(--blue);color:#fff;border-bottom-right-radius:4px;}
+.bubble.them{background:var(--g1);color:var(--navy);border-bottom-left-radius:4px;}
+.bubble-time{font-size:10px;color:var(--g3);margin-top:2px;padding:0 4px;}
+.b-avatar{width:30px;height:30px;border-radius:50%;background:var(--blue);font-size:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+
+/* ── Video course ── */
+.video-thumb{width:100%;height:220px;background:linear-gradient(160deg,#1B3A5C,#0E1F38);position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.play-btn{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:22px;}
+.vid-close{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,20,.5);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* ── Quiz answer ── */
+.quiz-opt{width:100%;padding:16px 20px;border-radius:14px;border:1.5px solid var(--g2);background:#fff;font-size:16px;font-weight:600;color:var(--navy);text-align:left;cursor:pointer;margin-bottom:10px;transition:border-color .15s,background .15s;}
+.quiz-opt:active,.quiz-opt.sel{border-color:var(--blue);background:rgba(20,75,216,.06);}
+.quiz-opt.correct{border-color:var(--green);background:rgba(0,182,122,.08);color:var(--green);}
+.quiz-opt.wrong{border-color:#E53E3E;background:rgba(229,62,62,.06);color:#E53E3E;}
+
+/* ── Support hotlines ── */
+.hotline-section{padding:20px 20px 0;}
+.hotline-title{font-size:12px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.hotline-desc{font-size:14px;color:var(--navy);line-height:1.5;margin-bottom:6px;}
+.hotline-hours{font-size:12px;color:var(--g4);margin-bottom:12px;}
+.hotline-call-btn{width:100%;height:46px;border-radius:23px;border:1.5px solid var(--blue);background:transparent;color:var(--blue);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.hotline-divider{height:1px;background:var(--g2);margin:20px 0 0;}
+
+/* ── Toast ── */
+.toast{position:absolute;bottom:80px;left:16px;right:16px;background:#1A1F50;color:#fff;border-radius:14px;padding:14px 18px;font-size:14px;font-weight:500;z-index:9999;animation:toastIn .25s ease;box-shadow:0 8px 24px rgba(0,0,20,.4);}
+@keyframes toastIn{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* ── Scan QR ── */
+.qr-viewfinder{position:relative;flex:1;background:#111;display:flex;align-items:center;justify-content:center;}
+.qr-frame{width:220px;height:220px;border-radius:20px;background:#fff;display:flex;align-items:center;justify-content:center;}
+.qr-frame svg{width:180px;height:180px;}
+.qr-label{position:absolute;bottom:30px;color:rgba(255,255,255,.7);font-size:14px;font-weight:500;text-align:center;width:100%;padding:0 40px;}
+.qr-shutter{position:absolute;bottom:80px;width:64px;height:64px;border-radius:50%;background:#fff;left:50%;transform:translateX(-50%);border:none;cursor:pointer;font-size:28px;display:flex;align-items:center;justify-content:center;}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ████ SCREEN: LOADING ████ -->
+<div id="s-loading" class="s on">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--dark);">
+    <div style="font-family:var(--font);font-size:36px;font-weight:800;color:var(--blue);letter-spacing:-.5px;">MEA</div>
+  </div>
+  <div style="display:flex;justify-content:center;gap:8px;padding-bottom:calc(var(--sb)+30px);background:var(--dark);">
+    <div style="width:18px;height:6px;border-radius:3px;background:#fff;"></div>
+    <div style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25);"></div>
+  </div>
+</div>
+
+<!-- ████ SCREEN: SPLASH ████ -->
+<div id="s-splash" class="s">
+  <div style="position:absolute;inset:0;background:url('assets/images/splash-bg.jpg') center/cover no-repeat;"></div>
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,10,30,.55) 0%,rgba(6,10,30,.25) 40%,rgba(6,10,30,.7) 75%,rgba(6,10,30,.95) 100%);"></div>
+  <div style="position:relative;z-index:2;flex:1;display:flex;flex-direction:column;padding:calc(var(--st)+20px) 0 0;">
+    <div style="text-align:center;padding:0 20px;"><span style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--blue);">MEA</span></div>
+    <div style="padding:40px 24px 0;">
+      <div style="font-family:var(--font);font-size:64px;font-weight:700;color:#fff;line-height:1.08;letter-spacing:-2px;">Fair.<br>Safe.<br>Just.</div>
+    </div>
+    <div style="flex:1;"></div>
+    <div style="padding:0 24px;">
+      <p style="font-size:15px;color:rgba(255,255,255,.7);line-height:1.6;">MEA allows citizens to satisfy their obligations to the criminal justice system in a safe, equitable, and rewarding way.</p>
+    </div>
+    <div style="display:flex;justify-content:center;gap:8px;padding:18px 0 12px;">
+      <div style="width:18px;height:6px;border-radius:3px;background:#fff;"></div>
+      <div style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.3);"></div>
+      <div style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.3);"></div>
+    </div>
+    <div style="display:flex;justify-content:center;padding:0 24px calc(var(--sb)+32px);">
+      <button class="btn" style="max-width:240px;" onclick="nav('language')">Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- ████ SCREEN: LANGUAGE SELECT ████ -->
+<div id="s-language" class="s" style="background:var(--dark);">
+  <div class="sb-dark"><span id="clk">9:41</span><div class="sb-icons">●●●</div></div>
+  <div style="text-align:center;padding:8px 20px 24px;"><span style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--blue);">MEA</span></div>
+  <div class="scroll" style="padding:0 24px;">
+    <h1 style="font-family:var(--font);font-size:32px;font-weight:800;color:#fff;letter-spacing:-.8px;margin-bottom:28px;">Select preferred<br>language</h1>
+    <div style="display:flex;flex-direction:column;gap:12px;padding-bottom:40px;">
+      <button class="lang-btn" onclick="nav('citation')">English</button>
+      <button class="lang-btn" onclick="nav('citation')">Spanish</button>
+      <button class="lang-btn" onclick="nav('citation')">Chinese</button>
+      <button class="lang-btn" onclick="nav('citation')">French</button>
+      <button class="lang-btn" onclick="nav('citation')">Russian</button>
+      <button class="lang-btn" onclick="nav('citation')">Italian</button>
+    </div>
+  </div>
+</div>
+
+<!-- ████ SCREEN: CITATION ENTRY ████ -->
+<div id="s-citation" class="s" style="background:#fff;">
+  <div class="sb-light"><span>9:41</span><div class="sb-icons">●●●</div></div>
+  <div style="padding:24px 24px 20px;">
+    <h1 style="font-family:var(--font);font-size:34px;font-weight:800;color:var(--navy);letter-spacing:-1px;line-height:1.1;">Enter your<br>citation number</h1>
+    <p style="font-size:15px;color:var(--g4);margin-top:10px;line-height:1.55;">This will identify your incident and the police report on file.</p>
+  </div>
+  <div class="otp-row" id="otp-display">
+    <div class="otp-box active" id="otp0">0</div>
+    <div class="otp-box" id="otp1">0</div>
+    <div class="otp-box" id="otp2">0</div>
+    <div class="otp-box" id="otp3">0</div>
+    <div class="otp-box" id="otp4">0</div>
+    <div class="otp-box" id="otp5">0</div>
+  </div>
+  <div style="text-align:center;padding:20px;"><span style="font-size:16px;font-weight:500;color:var(--navy);text-decoration:underline;cursor:pointer;" onclick="showToast('SMS and email options coming soon')">Other ways to sign in</span></div>
+  <div style="padding:0 24px 12px;">
+    <button class="btn" id="otp-continue-btn" onclick="nav('phone')" style="opacity:.35;pointer-events:none;">Continue →</button>
+  </div>
+  <div style="flex:1;"></div>
+  <div class="numpad" id="np-citation">
+    <button class="num-key" onclick="otpKey(1)">1<span class="sub">&nbsp;</span></button>
+    <button class="num-key" onclick="otpKey(2)">2<span class="sub">ABC</span></button>
+    <button class="num-key" onclick="otpKey(3)">3<span class="sub">DEF</span></button>
+    <button class="num-key" onclick="otpKey(4)">4<span class="sub">GHI</span></button>
+    <button class="num-key" onclick="otpKey(5)">5<span class="sub">JKL</span></button>
+    <button class="num-key" onclick="otpKey(6)">6<span class="sub">MNO</span></button>
+    <button class="num-key" onclick="otpKey(7)">7<span class="sub">PQRS</span></button>
+    <button class="num-key" onclick="otpKey(8)">8<span class="sub">TUV</span></button>
+    <button class="num-key" onclick="otpKey(9)">9<span class="sub">WXYZ</span></button>
+    <button class="num-key empty"></button>
+    <button class="num-key" onclick="otpKey(0)">0</button>
+    <button class="num-key del" onclick="otpDel()">⌫</button>
+  </div>
+</div>
+
+<!-- ████ SCREEN: PHONE CONFIRM ████ -->
+<div id="s-phone" class="s" style="background:#fff;">
+  <div class="sb-light"><span>9:41</span><div class="sb-icons">●●●</div></div>
+  <div style="padding:24px 24px 20px;">
+    <h1 style="font-family:var(--font);font-size:34px;font-weight:800;color:var(--navy);letter-spacing:-1px;line-height:1.1;">Confirm your<br>phone number</h1>
+    <p style="font-size:15px;color:var(--g4);margin-top:10px;">We sent a code to number ending in <strong>0262</strong></p>
+  </div>
+  <div class="otp-row" id="otp2-display">
+    <div class="otp-box active" id="otp2-0">0</div>
+    <div class="otp-box" id="otp2-1">0</div>
+    <div class="otp-box" id="otp2-2">0</div>
+    <div class="otp-box" id="otp2-3">0</div>
+    <div class="otp-box" id="otp2-4">0</div>
+    <div class="otp-box" id="otp2-5">0</div>
+  </div>
+  <div style="text-align:center;padding:20px;"><span style="font-size:15px;color:var(--navy);" id="resend-label">Resend in 59s</span></div>
+  <div style="padding:0 24px 12px;">
+    <button class="btn" id="otp2-continue-btn" onclick="nav('notice')" style="opacity:.35;pointer-events:none;">Continue →</button>
+  </div>
+  <div style="flex:1;"></div>
+  <div class="numpad">
+    <button class="num-key" onclick="otp2Key(1)">1<span class="sub">&nbsp;</span></button>
+    <button class="num-key" onclick="otp2Key(2)">2<span class="sub">ABC</span></button>
+    <button class="num-key" onclick="otp2Key(3)">3<span class="sub">DEF</span></button>
+    <button class="num-key" onclick="otp2Key(4)">4<span class="sub">GHI</span></button>
+    <button class="num-key" onclick="otp2Key(5)">5<span class="sub">JKL</span></button>
+    <button class="num-key" onclick="otp2Key(6)">6<span class="sub">MNO</span></button>
+    <button class="num-key" onclick="otp2Key(7)">7<span class="sub">PQRS</span></button>
+    <button class="num-key" onclick="otp2Key(8)">8<span class="sub">TUV</span></button>
+    <button class="num-key" onclick="otp2Key(9)">9<span class="sub">WXYZ</span></button>
+    <button class="num-key empty"></button>
+    <button class="num-key" onclick="otp2Key(0)">0</button>
+    <button class="num-key del" onclick="otp2Del()">⌫</button>
+  </div>
+</div>
+
+<!-- ████ SCREEN: CITATION NOTICE ████ -->
+<div id="s-notice" class="s">
+  <div class="scroll">
+  <div style="background:var(--dark);padding:calc(var(--st)+16px) 24px 24px;">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto;">🛍️</div>
+    </div>
+    <h1 style="font-family:var(--font);font-size:28px;font-weight:800;color:#fff;letter-spacing:-.7px;line-height:1.2;">Hi Orazio, you were issued a citation for Shoplifting</h1>
+    <p style="font-size:14px;color:rgba(255,255,255,.6);margin-top:12px;line-height:1.6;">On Thursday, January 15th, 2026 at Hampden St, Boston you were issued a citation by Boston Police Dept. Officer John Fitzgerald for Shoplifting, which is a Misdemeanor Class B.</p>
+    <!-- Officer narrative -->
+    <div style="margin-top:16px;background:rgba(255,255,255,.07);border-radius:12px;padding:14px 16px;border-left:3px solid rgba(229,116,79,.7);">
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Officer Narrative — BPD Report #2026-00482</div>
+      <p style="font-size:13px;color:rgba(255,255,255,.75);line-height:1.65;">At approximately 3:42 PM, Officer Fitzgerald observed the subject at Target, 35 Hampden St, concealing two items — a pair of Nike Air Max 270 sneakers ($119.99) and a Levi's Trucker jacket ($89.99) — inside a personal bag. Subject exited without payment. Total value: <strong style="color:#fff;">$209.98</strong>.</p>
+    </div>
+    <!-- Evidence photos -->
+    <div style="margin-top:16px;">
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">Evidence Photos (2)</div>
+      <div style="display:flex;gap:10px;">
+        <div style="flex:1;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.15);">
+          <img src="https://picsum.photos/seed/sneakers2026/300/200" style="width:100%;height:90px;object-fit:cover;display:block;" loading="lazy">
+          <div style="background:rgba(0,0,20,.8);padding:5px 8px;">
+            <div style="font-size:10px;color:rgba(255,255,255,.7);font-weight:600;">Nike Air Max 270</div>
+            <div style="display:flex;justify-content:space-between;"><span style="font-size:9px;color:rgba(255,255,255,.4);">EVD-001</span><span style="font-size:9px;color:rgba(255,255,255,.4);">$119.99</span></div>
+          </div>
+        </div>
+        <div style="flex:1;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.15);">
+          <img src="https://picsum.photos/seed/jacket2026/300/200" style="width:100%;height:90px;object-fit:cover;display:block;" loading="lazy">
+          <div style="background:rgba(0,0,20,.8);padding:5px 8px;">
+            <div style="font-size:10px;color:rgba(255,255,255,.7);font-weight:600;">Levi's Trucker Jacket</div>
+            <div style="display:flex;justify-content:space-between;"><span style="font-size:9px;color:rgba(255,255,255,.4);">EVD-002</span><span style="font-size:9px;color:rgba(255,255,255,.4);">$89.99</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:20px;border-radius:16px;overflow:hidden;background:rgba(255,255,255,.08);cursor:pointer;" onclick="showToast('▶️ Playing: How MEA Works')">
+      <div style="height:120px;background:linear-gradient(160deg,#1B3A5C,#0A1F38);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+        <img src="https://images.pexels.com/photos/5082579/pexels-photo-5082579.jpeg?auto=compress&cs=tinysrgb&w=600" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55;" loading="lazy">
+        <div style="position:absolute;inset:0;background:linear-gradient(160deg,rgba(27,58,92,.6),rgba(10,31,56,.7));"></div>
+        <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:20px;position:relative;z-index:1;">▶</div>
+      </div>
+      <div style="padding:12px 14px;"><div style="font-size:15px;font-weight:700;color:#fff;">How MEA Works</div><div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:2px;">Please watch this onboarding video</div></div>
+    </div>
+  </div>
+  <div style="background:#fff;">
+    <div style="padding:24px 20px 0;display:flex;flex-direction:column;gap:10px;">
+      <button class="btn btn-dark" onclick="nav('verify')">Join MEA</button>
+      <button class="btn btn-outline" style="border-color:var(--blue);color:var(--blue);background:#fff;" onclick="nav('defender')">💬 Chat with Public Defender</button>
+      <button class="btn btn-outline" style="border-color:var(--g2);color:var(--navy);background:#fff;" onclick="showToast('Bodycam video request submitted')">Watch bodycam video</button>
+    </div>
+    <!-- Charge Details Card -->
+    <div style="margin:16px 20px 0;border-radius:14px;border:1px solid var(--g2);overflow:hidden;">
+      <div style="background:var(--g1);padding:10px 14px;border-bottom:1px solid var(--g2);">
+        <div style="font-size:11px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.6px;">Incident Details</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+        <div style="padding:12px 14px;border-bottom:1px solid var(--g2);border-right:1px solid var(--g2);">
+          <div style="font-size:11px;color:var(--g4);margin-bottom:2px;">Officer</div>
+          <div style="font-size:13px;font-weight:600;color:var(--navy);">John Fitzgerald</div>
+        </div>
+        <div style="padding:12px 14px;border-bottom:1px solid var(--g2);">
+          <div style="font-size:11px;color:var(--g4);margin-bottom:2px;">Badge #</div>
+          <div style="font-size:13px;font-weight:600;color:var(--navy);">BPD-4821</div>
+        </div>
+        <div style="padding:12px 14px;border-bottom:1px solid var(--g2);border-right:1px solid var(--g2);">
+          <div style="font-size:11px;color:var(--g4);margin-bottom:2px;">Date &amp; Time</div>
+          <div style="font-size:13px;font-weight:600;color:var(--navy);">Jan 15, 2026 3:42 PM</div>
+        </div>
+        <div style="padding:12px 14px;border-bottom:1px solid var(--g2);">
+          <div style="font-size:11px;color:var(--g4);margin-bottom:2px;">Location</div>
+          <div style="font-size:13px;font-weight:600;color:var(--navy);">Hampden St, Boston</div>
+        </div>
+        <div style="padding:12px 14px;border-right:1px solid var(--g2);">
+          <div style="font-size:11px;color:var(--g4);margin-bottom:2px;">Offense Class</div>
+          <div style="font-size:13px;font-weight:600;color:var(--orange);">Misdemeanor Class B</div>
+        </div>
+        <div style="padding:12px 14px;">
+          <div style="font-size:11px;color:var(--g4);margin-bottom:2px;">Fine (if charged)</div>
+          <div style="font-size:13px;font-weight:600;color:var(--navy);">$500</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:16px 20px 0;">
+      <div style="font-family:var(--font);font-size:15px;font-weight:700;color:var(--navy);margin-bottom:4px;">Join MEA to complete tasks and avoid a fine!</div>
+      <div style="display:flex;align-items:center;gap:10px;margin:12px 0;">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">24h</div>
+        <p style="font-size:14px;color:var(--g4);line-height:1.5;">You need to complete 24 hours. Select tasks you like and book time slots.</p>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--g2);margin:0 20px;"></div>
+    <div style="padding:16px 20px;" onclick="showToast('MEA Tasks are community service activities in your area')">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+        <span style="font-size:13px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;">What are MEA Tasks?</span>
+        <span style="color:var(--g3);">›</span>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--g2);margin:0 20px;"></div>
+    <div style="padding:16px 20px;" onclick="showToast('The MEA Learning Platform offers short educational videos and quizzes')">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+        <span style="font-size:13px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;">What is the MEA Learning Platform?</span>
+        <span style="color:var(--g3);">›</span>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--g2);margin:0 20px;"></div>
+    <div style="padding:16px 20px;" onclick="showToast('Community service includes food banks, park cleanups, shelters and more')">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+        <span style="font-size:13px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;">What community service tasks will I be expected to complete?</span>
+        <span style="color:var(--g3);">›</span>
+      </div>
+    </div>
+    <div style="height:32px;"></div>
+  </div>
+  </div><!-- /scroll -->
+</div>
+
+<!-- ████ SCREEN: PUBLIC DEFENDER CHAT ████ -->
+<div id="s-defender" class="s" style="background:#fff;flex-direction:column;">
+  <div class="sb-light"><span>9:41</span><div class="sb-icons" style="color:#000;">●●●</div></div>
+  <div class="light-nav" style="border-bottom:1px solid var(--g2);padding-bottom:12px;">
+    <button class="back-circle" onclick="nav('notice')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 4L6 8l4 4" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <div>
+      <div style="font-size:17px;font-weight:700;color:var(--navy);">Public Defender</div>
+      <div style="font-size:12px;color:var(--green);font-weight:600;margin-top:1px;">● Sarah Chen — Online</div>
+    </div>
+    <div style="margin-left:auto;width:38px;height:38px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:18px;">⚖️</div>
+  </div>
+  <div class="scroll" style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;" id="defender-chat"></div>
+  <div style="padding:10px 16px calc(var(--sb)+10px);border-top:1px solid var(--g2);display:flex;gap:10px;align-items:center;background:#fff;flex-shrink:0;">
+    <div style="flex:1;height:44px;border-radius:22px;background:var(--g1);padding:0 16px;font-size:15px;color:var(--g4);display:flex;align-items:center;cursor:pointer;" onclick="showToast('Type your question...')">Ask a question...</div>
+    <button style="width:44px;height:44px;border-radius:50%;background:var(--blue);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="showToast('Message sent to Sarah Chen')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ████ SCREEN: VERIFY IDENTITY ████ -->
+<div id="s-verify" class="s" style="background:var(--dark);">
+  <div class="sb-dark"><span>9:41</span><div class="sb-icons">●●●</div></div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 32px 20px;">
+    <div style="width:160px;height:160px;border-radius:50%;border:2px dashed rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:60px;margin-bottom:28px;">🪪</div>
+    <h2 style="font-family:var(--font);font-size:26px;font-weight:800;color:#fff;text-align:center;letter-spacing:-.5px;line-height:1.2;">Take a selfie and verify your ID</h2>
+  </div>
+  <div style="padding:0 24px calc(var(--sb)+32px);">
+    <button class="btn" onclick="nav('verified')">Take Photo</button>
+  </div>
+</div>
+
+<!-- ████ SCREEN: IDENTITY VERIFIED ████ -->
+<div id="s-verified" class="s" style="background:var(--dark);">
+  <div class="sb-dark"><span>9:41</span><div class="sb-icons">●●●</div></div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 32px 20px;">
+    <div style="width:160px;height:160px;border-radius:50%;border:2px dashed rgba(0,182,122,.4);display:flex;align-items:center;justify-content:center;font-size:60px;margin-bottom:28px;background:rgba(0,182,122,.08);">✅</div>
+    <h2 style="font-family:var(--font);font-size:32px;font-weight:800;color:#fff;text-align:center;letter-spacing:-.8px;">Thank you</h2>
+    <p style="font-size:15px;color:rgba(255,255,255,.55);text-align:center;margin-top:8px;">Your identity successfully verified</p>
+  </div>
+  <div style="padding:0 24px calc(var(--sb)+32px);">
+    <button class="btn" onclick="nav('zip')">Continue</button>
+  </div>
+</div>
+
+<!-- ████ SCREEN: ZIP / CITY ████ -->
+<div id="s-zip" class="s" style="background:#fff;">
+  <div class="sb-light"><span>9:41</span><div class="sb-icons" style="color:#000;">●●●</div></div>
+  <div style="padding:24px 24px 20px;">
+    <div style="width:32px;height:32px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:16px;">👤</div>
+    <h1 style="font-family:var(--font);font-size:34px;font-weight:800;color:var(--navy);letter-spacing:-1px;line-height:1.1;">Your ZIP or City</h1>
+    <p style="font-size:15px;color:var(--g4);margin-top:10px;line-height:1.55;">Please specify this to let MEA recommend you tasks nearby</p>
+  </div>
+  <div style="padding:0 24px;flex:1;">
+    <div style="font-family:var(--font);font-size:40px;font-weight:700;color:var(--navy);border-bottom:2px solid var(--blue);padding-bottom:8px;" id="zip-val">Boston<span style="animation:blink 1s step-end infinite;color:var(--blue);">|</span></div>
+  </div>
+  <div style="padding:16px 24px calc(var(--sb)+16px);">
+    <button class="btn" onclick="nav('home')">Continue</button>
+  </div>
+  <style>@keyframes blink{50%{opacity:0}}</style>
+</div>
+
+<!-- ████ SCREEN: TASK PARAMS ████ -->
+<div id="s-params" class="s" style="background:#fff;">
+  <div class="sb-light"><span>9:41</span><div class="sb-icons" style="color:#000;">●●●</div></div>
+  <div style="padding:24px 24px 20px;">
+    <div style="width:32px;height:32px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:16px;">👤</div>
+    <h1 style="font-family:var(--font);font-size:34px;font-weight:800;color:var(--navy);letter-spacing:-1px;">Select task parameters</h1>
+    <p style="font-size:15px;color:var(--g4);margin-top:10px;">You will be able to adjust this later in profile settings</p>
+  </div>
+  <div style="flex:1;">
+    <div style="border-top:1px solid var(--g2);" id="params-rows"></div>
+  </div>
+  <div style="padding:16px 24px calc(var(--sb)+16px);">
+    <button class="btn" onclick="nav('home')">Browse 35 tasks</button>
+  </div>
+</div>
+
+<!-- ████ SCREEN: DASHBOARD / HOME ████ -->
+<div id="s-home" class="s" style="background:var(--dark);">
+  <div style="background:var(--dark);flex-shrink:0;padding-top:var(--st);">
+    <div class="top-nav">
+      <div class="nav-group">
+        <button class="nav-icon-btn" onclick="openMenu()"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue2),var(--blue));display:flex;align-items:center;justify-content:center;font-size:16px;">👤</div>
+      </div>
+      <div class="mea">MEA</div>
+      <div class="nav-group">
+        <button class="nav-icon-btn" onclick="openContacts()"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.07 1.18 2 2 0 012.07 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></button>
+        <button class="nav-icon-btn" onclick="nav('chats')" style="position:relative;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          <div style="position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#E53E3E;border:1.5px solid var(--dark);"></div>
+        </button>
+      </div>
+    </div>
+    <!-- Case progress card -->
+    <div class="case-card" id="home-case-card">
+      <div class="case-card-top">
+        <div class="case-icon">🛍️</div>
+        <div>
+          <div class="case-title">Shoplifting</div>
+          <div class="case-sub" id="home-hours">0h / 24h completed</div>
+        </div>
+        <div style="margin-left:auto;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;" onclick="showToast('Case details: MA-2026-048291')">ℹ</div>
+      </div>
+      <div class="case-bar-track"><div class="case-bar-fill" id="home-bar" style="width:0%;transition:width .6s ease;"></div></div>
+      <div class="case-dots"><div class="case-dot on"></div><div class="case-dot"></div><div class="case-dot"></div></div>
+    </div>
+    <!-- Location pill -->
+    <div class="loc-pill" id="loc-pill" onclick="activateLocation()">
+      <div class="loc-dot" id="loc-dot"></div>
+      <span id="loc-text">Location sharing is inactive</span>
+      <svg style="margin-left:auto;flex-shrink:0;" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 12l4-4-4-4" stroke="rgba(255,255,255,.4)" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+  <div class="scroll">
+    <!-- Featured task card -->
+    <div style="padding:0 16px;margin-top:14px;">
+      <div class="task-card-home" onclick="nav('task-detail')">
+        <div class="photo">
+          <img src="https://report.bgcb.org/wp-content/uploads/2026/03/Untitled-design-62.png" alt="Boys &amp; Girls Clubs" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+          <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,20,.2),rgba(0,0,20,.5));"></div>
+          <div style="position:absolute;top:10px;left:10px;background:rgba(0,0,20,.5);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:#fff;">Boys &amp; Girls Clubs of Boston</div>
+        </div>
+        <div class="body">
+          <div class="info">
+            <div class="name">Boys &amp; Girls Clubs of Boston</div>
+            <div class="time">12pm–1pm</div>
+          </div>
+          <button class="checkin-btn" onclick="event.stopPropagation();openCheckin()">Check In</button>
+        </div>
+      </div>
+    </div>
+    <!-- Upcoming tasks -->
+    <div class="section-row">
+      <div class="section-title" id="home-task-count">3 Upcoming Tasks</div>
+      <button class="section-plus" onclick="nav('tasks')">+</button>
+    </div>
+    <div class="upcoming-row">
+      <div class="upcoming-card" onclick="nav('task-detail')">
+        <div class="up-photo" style="position:relative;">
+          <img src="https://report.bgcb.org/wp-content/uploads/2026/03/Untitled-design-62.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+          <div style="position:absolute;inset:0;background:rgba(0,0,20,.3);"></div>
+          <div class="hours-badge" style="position:relative;z-index:1;">3 hours</div>
+        </div>
+        <div class="up-body">
+          <div class="up-name">Boys &amp; Girls Clubs of Boston</div>
+          <div class="up-time">Today, Feb 1, 12pm</div>
+        </div>
+      </div>
+      <div class="upcoming-card" onclick="nav('task-detail')">
+        <div class="up-photo" style="position:relative;">
+          <img src="https://www.tclf.org/sites/default/files/thumbnails/image/SIG%20IMAGE_Scarboro%20Pond%20Bridge%20-%20Dan%20Tobyne_sig_001.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+          <div style="position:absolute;inset:0;background:rgba(0,0,20,.25);"></div>
+        </div>
+        <div class="up-body">
+          <div class="up-name">Franklin Park Cleanup</div>
+          <div class="up-time">Friday, Feb 8, 1pm</div>
+        </div>
+      </div>
+    </div>
+    <!-- Online courses -->
+    <div class="section-row">
+      <div class="section-title">Online Courses</div>
+      <button class="section-plus" onclick="nav('course')" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:22px;">→</button>
+    </div>
+    <div class="courses-row" style="padding-bottom:calc(var(--sb)+20px);">
+      <div class="course-card" onclick="nav('course')">
+        <div class="c-photo" style="position:relative;">
+          <img src="https://images.pexels.com/photos/6995201/pexels-photo-6995201.jpeg?auto=compress&cs=tinysrgb&w=400" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+          <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,20,.85) 0%,rgba(0,0,20,.2) 60%);"></div>
+          <div class="c-title" style="position:relative;z-index:1;">The Importance of Community Service</div>
+        </div>
+      </div>
+      <div class="course-card" onclick="nav('course')">
+        <div class="c-photo" style="position:relative;">
+          <img src="https://images.pexels.com/photos/3786149/pexels-photo-3786149.jpeg?auto=compress&cs=tinysrgb&w=400" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+          <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,20,.85) 0%,rgba(0,0,20,.2) 60%);"></div>
+          <div class="c-title" style="position:relative;z-index:1;">Dangers of Substance Abuse</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ████ SCREEN: AVAILABLE TASKS ████ -->
+<div id="s-tasks" class="s" style="background:#fff;">
+  <div class="sb-light"><span>9:41</span><div class="sb-icons" style="color:#000;">●●●</div></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 20px 12px;border-bottom:1px solid var(--g2);">
+    <h2 style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--navy);">Available Tasks</h2>
+    <div style="display:flex;gap:8px;">
+      <button class="back-circle" onclick="nav('map')" style="border-radius:10px;width:40px;height:40px;">📍</button>
+      <button class="back-circle" onclick="nav('params')" style="border-radius:10px;width:40px;height:40px;">⚙️</button>
+    </div>
+  </div>
+  <div class="scroll">
+    <div class="task-list-item" onclick="nav('task-detail')">
+      <div class="tli-photo" style="overflow:hidden;"><img src="https://report.bgcb.org/wp-content/uploads/2026/03/Untitled-design-62.png" style="width:100%;height:100%;object-fit:cover;"></div>
+      <div class="tli-info">
+        <div class="tli-name">Boys &amp; Girls Clubs of Boston</div>
+        <div class="tli-desc">Support youth programs, mentor members, and help with daily Club activities.</div>
+        <div class="tli-dist">📍 2.4 miles</div>
+      </div>
+    </div>
+    <div class="task-list-item" onclick="nav('task-detail')">
+      <div class="tli-photo" style="overflow:hidden;"><img src="https://www.tclf.org/sites/default/files/thumbnails/image/SIG%20IMAGE_Scarboro%20Pond%20Bridge%20-%20Dan%20Tobyne_sig_001.jpg" style="width:100%;height:100%;object-fit:cover;"></div>
+      <div class="tli-info">
+        <div class="tli-name">Franklin Park Cleanup</div>
+        <div class="tli-desc">Help clean and maintain one of Boston's largest green spaces.</div>
+        <div class="tli-dist">📍 3.1 miles</div>
+      </div>
+    </div>
+    <div class="task-list-item" onclick="nav('task-detail')">
+      <div class="tli-photo" style="overflow:hidden;"><img src="https://assets.bowery.org/filer_public/43/5f/435fe737-d34a-4763-973a-9db5f6e9e858/fy23downloads_branding-section_1200.jpg" style="width:100%;height:100%;object-fit:cover;"></div>
+      <div class="tli-info">
+        <div class="tli-name">Bowery Mission Shelter</div>
+        <div class="tli-desc">Serve meals and assist staff at Boston's longest-running shelter.</div>
+        <div class="tli-dist">📍 1.8 miles</div>
+      </div>
+    </div>
+    <div class="task-list-item" onclick="nav('task-detail')">
+      <div class="tli-photo" style="overflow:hidden;"><img src="https://www.bmc.org/sites/default/files/styles/full_width_image/public/2024-03/BMC-FeaturedImage.jpg" style="width:100%;height:100%;object-fit:cover;"></div>
+      <div class="tli-info">
+        <div class="tli-name">Boston Toxicology Center</div>
+        <div class="tli-desc">Support community health and outreach services in the Roxbury area.</div>
+        <div class="tli-dist">📍 4.2 miles</div>
+      </div>
+    </div>
+    <div class="task-list-item" onclick="nav('task-detail')">
+      <div class="tli-photo" style="overflow:hidden;"><img src="https://www.gbfb.org/wp-content/uploads/2021/02/gbfbcovid_wh_0377-470x300.jpg" style="width:100%;height:100%;object-fit:cover;"></div>
+      <div class="tli-info">
+        <div class="tli-name">Boston Food Bank</div>
+        <div class="tli-desc">Sort and pack donations, assist distribution lines in the South End.</div>
+        <div class="tli-dist">📍 0.8 miles</div>
+      </div>
+    </div>
+    <div class="task-list-item" onclick="nav('task-detail')">
+      <div class="tli-photo" style="overflow:hidden;"><img src="https://thetrustees.org/wp-content/uploads/2020/07/Greenwood-Community-Garden.jpg" style="width:100%;height:100%;object-fit:cover;"></div>
+      <div class="tli-info">
+        <div class="tli-name">Dorchester Community Garden</div>
+        <div class="tli-desc">Help maintain garden beds, plant seasonal crops, and assist community events.</div>
+        <div class="tli-dist">📍 4.2 miles</div>
+      </div>
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+  <div style="padding:12px 20px calc(var(--sb)+12px);border-top:1px solid var(--g2);">
+    <button class="btn btn-sm" onclick="nav('home')">← Back to Dashboard</button>
+  </div>
+</div>
+
+<!-- ████ SCREEN: TASK DETAIL ████ -->
+<div id="s-task-detail" class="s" style="background:#fff;">
+  <div style="position:relative;flex-shrink:0;">
+    <div class="td-photo">
+      <img src="https://report.bgcb.org/wp-content/uploads/2026/03/Untitled-design-62.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+      <div class="td-photo-overlay"></div>
+      <button style="position:absolute;top:calc(var(--st)+12px);left:16px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,20,.5);border:none;color:#fff;font-size:18px;cursor:pointer;z-index:3;display:flex;align-items:center;justify-content:center;" onclick="nav('home')">‹</button>
+      <div class="td-photo-content">
+        <div class="td-name">Boys &amp; Girls Clubs of Boston</div>
+        <div class="td-sub">Support youth programs, mentor members, and help with daily Club activities.</div>
+        <div class="td-dist">📍 2.4 miles</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll">
+    <div class="supervisor-card">
+      <div class="sup-avatar">👩</div>
+      <div>
+        <div class="sup-text">"Hi, I'm the MEA contact here at Boys &amp; Girls Clubs of Boston, my office is on the 1st floor on the corridor in the Smith Office."</div>
+        <div class="sup-name">— Jane Doe, Supervisor</div>
+      </div>
+    </div>
+    <div style="padding:0 16px;margin-top:4px;">
+      <div style="font-size:13px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Task capabilities</div>
+    </div>
+    <div class="capabilities-row">
+      <div class="cap-chip">🧹 Cleaning</div>
+      <div class="cap-chip">🤝 Assistance</div>
+      <div class="cap-chip">✨ Other</div>
+    </div>
+    <div style="padding:16px 16px 0;">
+      <div style="font-size:13px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Requirements</div>
+      <div style="background:var(--g1);border-radius:12px;padding:14px 16px;">
+        <div style="font-size:14px;color:var(--navy);line-height:1.5;">Casual/comfortable clothing recommended. Open-toed shoes not permitted. Check in via MEA app when you arrive.</div>
+      </div>
+    </div>
+    <div style="padding:20px 16px calc(var(--sb)+20px);">
+      <button class="btn" onclick="nav('calendar')">Book a Timeslot</button>
+    </div>
+  </div>
+</div>
+
+<!-- ████ SCREEN: CALENDAR ████ -->
+<div id="s-calendar" class="s" style="background:#fff;">
+  <div class="sb-light"><span>9:41</span><div class="sb-icons" style="color:#000;">●●●</div></div>
+  <div class="light-nav">
+    <button class="back-circle" onclick="nav('task-detail')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 4L6 8l4 4" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg></button>
+  </div>
+  <div class="scroll">
+    <div class="cal-header">
+      <button style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--g3);">‹</button>
+      <div class="cal-month">February 2026 ›</div>
+      <button style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--navy);">›</button>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-dow">Sun</div><div class="cal-dow">Mon</div><div class="cal-dow">Tue</div><div class="cal-dow">Wed</div><div class="cal-dow">Thu</div><div class="cal-dow">Fri</div><div class="cal-dow">Sat</div>
+      <div class="cal-day dim">26</div><div class="cal-day dim">27</div><div class="cal-day dim">28</div><div class="cal-day dim">29</div><div class="cal-day dim">30</div><div class="cal-day dim">31</div>
+      <div class="cal-day selected" onclick="selDay(this)">1</div>
+      <div class="cal-day avail" onclick="selDay(this)">2</div><div class="cal-day" onclick="selDay(this)">3</div><div class="cal-day" onclick="selDay(this)">4</div>
+      <div class="cal-day avail" onclick="selDay(this)">5</div><div class="cal-day" onclick="selDay(this)">6</div>
+      <div class="cal-day avail" onclick="selDay(this)">7</div><div class="cal-day" onclick="selDay(this)">8</div><div class="cal-day" onclick="selDay(this)">9</div>
+      <div class="cal-day" onclick="selDay(this)">10</div><div class="cal-day" onclick="selDay(this)">11</div><div class="cal-day" onclick="selDay(this)">12</div>
+      <div class="cal-day avail" onclick="selDay(this)">13</div><div class="cal-day" onclick="selDay(this)">14</div><div class="cal-day" onclick="selDay(this)">15</div><div class="cal-day" onclick="selDay(this)">16</div>
+      <div class="cal-day avail" onclick="selDay(this)">17</div><div class="cal-day" onclick="selDay(this)">18</div><div class="cal-day" onclick="selDay(this)">19</div><div class="cal-day" onclick="selDay(this)">20</div>
+      <div class="cal-day" onclick="selDay(this)">21</div><div class="cal-day" onclick="selDay(this)">22</div><div class="cal-day" onclick="selDay(this)">23</div><div class="cal-day" onclick="selDay(this)">24</div><div class="cal-day" onclick="selDay(this)">25</div>
+      <div class="cal-day" onclick="selDay(this)">26</div><div class="cal-day" onclick="selDay(this)">27</div><div class="cal-day" onclick="selDay(this)">28</div>
+    </div>
+    <div style="height:1px;background:var(--g2);margin:16px 16px 0;"></div>
+    <div style="padding:12px 16px 4px;font-size:14px;font-weight:600;color:var(--navy);">February 1</div>
+    <div class="time-slots">
+      <button class="time-slot" onclick="selSlot(this)">10am–11am</button>
+      <button class="time-slot" onclick="selSlot(this)">11am–12pm</button>
+      <button class="time-slot selected" onclick="selSlot(this)">12pm–1pm</button>
+      <button class="time-slot" onclick="selSlot(this)">1pm–2pm</button>
+    </div>
+    <div style="padding:8px 20px calc(var(--sb)+20px);">
+      <button class="btn" onclick="nav('booked')">Book a Timeslot</button>
+    </div>
+  </div>
+</div>
+
+<!-- ████ SCREEN: BOOKING CONFIRMED ████ -->
+<div id="s-booked" class="s" style="background:var(--off);">
+  <div class="sb-light"><span>9:41</span><div class="sb-icons" style="color:#000;">●●●</div></div>
+  <div class="scroll">
+    <div class="booking-photo">
+      <img src="https://report.bgcb.org/wp-content/uploads/2026/03/Untitled-design-62.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:16px;">
+      <div style="position:absolute;inset:0;background:rgba(0,0,20,.3);border-radius:16px;"></div>
+      <div style="position:absolute;bottom:10px;right:10px;width:36px;height:36px;border-radius:50%;background:rgba(0,182,122,.9);display:flex;align-items:center;justify-content:center;font-size:16px;z-index:2;">✓</div>
+    </div>
+    <div style="padding:20px 20px 0;">
+      <h2 style="font-family:var(--font);font-size:24px;font-weight:800;color:var(--navy);letter-spacing:-.5px;">Boys &amp; Girls Clubs of Boston</h2>
+      <p style="font-size:15px;color:var(--g4);margin-top:6px;">February 1, 12pm–1pm</p>
+    </div>
+    <div style="padding:24px 20px;display:flex;flex-direction:column;gap:12px;">
+      <button class="btn" onclick="nav('home')">Go to Dashboard</button>
+      <button class="btn btn-outline" style="border-color:var(--g2);color:var(--navy);background:#fff;box-shadow:none;" onclick="nav('calendar')">Book Another Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- ████ SCREEN: ACTIVE TIMER ████ -->
+<div id="s-active" class="s" style="background:var(--dark);">
+  <div style="background:var(--dark);flex-shrink:0;padding-top:var(--st);">
+    <div class="top-nav">
+      <div class="nav-group">
+        <button class="nav-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue2),var(--blue));display:flex;align-items:center;justify-content:center;font-size:16px;">👤</div>
+      </div>
+      <div class="mea">MEA</div>
+      <div class="nav-group">
+        <button class="nav-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.07 1.18 2 2 0 012.07 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></button>
+        <button class="nav-icon-btn" onclick="nav('chats')"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+      </div>
+    </div>
+    <div class="case-card">
+      <div class="case-card-top">
+        <div class="case-icon">🛍️</div>
+        <div><div class="case-title">Shoplifting</div><div class="case-sub">1h / 24h completed</div></div>
+      </div>
+      <div class="case-bar-track"><div class="case-bar-fill" style="width:4%;"></div></div>
+      <div class="case-dots"><div class="case-dot on"></div><div class="case-dot"></div><div class="case-dot"></div></div>
+    </div>
+    <div class="loc-pill">
+      <div class="loc-dot active"></div>
+      <span style="color:rgba(255,255,255,.8);">Location sharing is active</span>
+    </div>
+  </div>
+  <div class="scroll">
+    <div style="margin:14px 16px 0;">
+      <div class="timer-card">
+        <div class="t-photo">🏫</div>
+        <div class="t-body">
+          <div class="t-name">Boys &amp; Girls Clubs of Boston</div>
+          <div class="t-desc">Support youth programs, mentor members, and help with daily Club activities.</div>
+          <div class="t-bottom">
+            <div>
+              <div class="timer-val" id="timer-display">00:25</div>
+              <div class="timer-label">Time worked</div>
+            </div>
+            <button class="checkout-btn" onclick="openCheckout()">Check Out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section-row"><div class="section-title">3 Upcoming Tasks</div><button class="section-plus" onclick="nav('tasks')">+</button></div>
+    <div class="upcoming-row" style="padding-bottom:calc(var(--sb)+20px);">
+      <div class="upcoming-card"><div class="up-photo" style="background:linear-gradient(160deg,#1E4878,#0C2040);"><span>🏫</span><div class="hours-badge">3 hours</div></div><div class="up-body"><div class="up-name">Boys &amp; Girls Clubs of Boston</div><div class="up-time">Today, Feb 1, 12pm</div></div></div>
+      <div class="upcoming-card"><div class="up-photo" style="background:linear-gradient(160deg,#1A5C2A,#0C3018);"><span>🌳</span></div><div class="up-body"><div class="up-name">Franklin Park Cleanup</div><div class="up-time">Friday, Feb 8, 1pm</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ████ SCREEN: CHATS LIST ████ -->
+<div id="s-chats" class="s" style="background:#fff;">
+  <div class="sb-light"><span>9:41</span><div class="sb-icons" style="color:#000;">●●●</div></div>
+  <div style="display:flex;align-items:center;gap:12px;padding:4px 20px 16px;border-bottom:1px solid var(--g2);">
+    <button class="back-circle" onclick="nav('home')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 4L6 8l4 4" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <h2 style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--navy);">Chats</h2>
+  </div>
+  <div class="scroll">
+    <div style="padding:16px 20px 6px;font-size:15px;font-weight:700;color:var(--navy);">Unreads</div>
+    <div class="chat-thread-item" onclick="nav('chat')">
+      <div class="ct-avatar">👩</div>
+      <div class="ct-info"><div class="ct-name">Talan Dorwart</div><div class="ct-preview">Hello, waiting at the lobby</div></div>
+      <div style="text-align:right;flex-shrink:0;"><div class="ct-time">2h ago</div><div class="ct-badge">1</div></div>
+    </div>
+    <div class="chat-thread-item" onclick="nav('chat')">
+      <div class="ct-avatar" style="background:linear-gradient(135deg,#5B21B6,#2D0A6A);">👩‍🦱</div>
+      <div class="ct-info"><div class="ct-name">Cheyenne Calzoni</div><div class="ct-preview">Thank you for your visit</div></div>
+      <div style="text-align:right;flex-shrink:0;"><div class="ct-time">2h ago</div><div class="ct-badge">2</div></div>
+    </div>
+    <div style="padding:16px 20px 6px;font-size:15px;font-weight:700;color:var(--navy);">History</div>
+    <div class="chat-thread-item" onclick="nav('chat')">
+      <div class="ct-avatar" style="background:linear-gradient(135deg,#374151,#111827);">🕶️</div>
+      <div class="ct-info"><div class="ct-name">Emery Herwitz</div><div class="ct-preview">Hello, waiting at the lobby</div></div>
+      <div class="ct-time" style="flex-shrink:0;">2h ago</div>
+    </div>
+    <div class="chat-thread-item" onclick="nav('chat')">
+      <div class="ct-avatar" style="background:linear-gradient(135deg,#BE185D,#831843);">👩</div>
+      <div class="ct-info"><div class="ct-name">Kaiya Franci</div><div class="ct-preview">Thank you for your visit</div></div>
+      <div class="ct-time" style="flex-shrink:0;">2h ago</div>
+    </div>
+  </div>
+</div>
+
+<!-- ████ SCREEN: CHAT THREAD ████ -->
+<div id="s-chat" class="s" style="background:#fff;">
+  <div class="sb-light"><span>9:41</span><div class="sb-icons" style="color:#000;">●●●</div></div>
+  <div style="display:flex;align-items:center;gap:12px;padding:4px 20px 12px;border-bottom:1px solid var(--g2);">
+    <button class="back-circle" onclick="nav('chats')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 4L6 8l4 4" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <h2 style="font-family:var(--font);font-size:18px;font-weight:700;color:var(--navy);">Talan Dorwart</h2>
+  </div>
+  <div class="scroll" style="padding:16px;">
+    <div style="text-align:center;font-size:12px;color:var(--g3);margin-bottom:14px;">Today</div>
+    <div class="bubble-wrap them">
+      <div class="b-avatar">👩</div>
+      <div><div class="bubble them">Hi, when you arrive you can do check ins at my office, on the 1st floor down the long corridor in the Smith Office.</div><div class="bubble-time">01:23 PM</div></div>
+    </div>
+    <div class="bubble-wrap me">
+      <div class="bubble me">I'll be there in a min!</div>
+      <div class="bubble-time">01:23 PM</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;padding:10px 16px calc(var(--sb)+10px);border-top:1px solid var(--g2);">
+    <input type="text" placeholder="Type your message..." style="flex:1;height:44px;border-radius:22px;border:1.5px solid var(--g2);background:var(--g1);padding:0 16px;font-size:14px;color:var(--navy);outline:none;">
+    <button onclick="showToast('Message sent ✓')" style="width:44px;height:44px;border-radius:50%;background:var(--blue-grad);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;">→</button>
+  </div>
+</div>
+
+<!-- ████ SCREEN: COURSE VIDEO ████ -->
+<div id="s-course" class="s" style="background:#fff;">
+  <div class="sb-light"><span>9:41</span><div class="sb-icons" style="color:#000;">●●●</div></div>
+  <div class="video-thumb" onclick="showToast('▶️ Playing video...')" style="position:relative;overflow:hidden;">
+    <img src="https://images.pexels.com/photos/6995201/pexels-photo-6995201.jpeg?auto=compress&cs=tinysrgb&w=800" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.5;">
+    <div style="position:absolute;inset:0;background:linear-gradient(160deg,rgba(27,58,92,.55),rgba(14,31,56,.7));"></div>
+    <div class="play-btn" style="position:relative;z-index:1;">▶</div>
+    <button class="vid-close" onclick="event.stopPropagation();nav('home')" style="position:absolute;top:12px;right:12px;z-index:2;">✕</button>
+  </div>
+  <div class="scroll" style="padding:20px 20px 0;">
+    <h2 style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--navy);letter-spacing:-.5px;">The Importance of Community Service</h2>
+    <p style="font-size:14px;color:var(--g4);margin-top:10px;line-height:1.6;">Jordan shares her experience volunteering in her community and inspires listeners to engage in community service too. Jordan is a senior at Howell High School.</p>
+    <div style="font-size:13px;color:var(--g3);margin-top:8px;">7 minutes</div>
+    <div style="background:var(--g1);border-radius:14px;padding:14px 16px;margin-top:16px;display:flex;gap:12px;align-items:flex-start;">
+      <div style="font-size:20px;flex-shrink:0;">❓</div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--navy);">This Course requires you to answer 6 questions after you watch this video</div>
+        <div style="font-size:13px;color:var(--g4);margin-top:4px;">0/6 answered</div>
+      </div>
+    </div>
+    <div style="padding:20px 0 calc(var(--sb)+20px);">
+      <button class="btn" onclick="nav('quiz')">Open Questionnaire</button>
+    </div>
+  </div>
+</div>
+
+<!-- ████ SCREEN: QUIZ ████ -->
+<div id="s-quiz" class="s" style="background:#fff;">
+  <div class="sb-light"><span>9:41</span><div class="sb-icons" style="color:#000;">●●●</div></div>
+  <div class="light-nav">
+    <button class="back-circle" onclick="nav('course')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 4L6 8l4 4" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg></button>
+  </div>
+  <div class="scroll" style="padding:8px 20px;">
+    <div style="font-size:13px;font-weight:600;color:var(--g4);margin-bottom:16px;">Question 1 of 6</div>
+    <h2 style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--navy);letter-spacing:-.5px;line-height:1.3;margin-bottom:24px;">On average, what percentage of local businesses are owned by people who live in the community?</h2>
+    <button class="quiz-opt" onclick="answerQuiz(this,false)">30%</button>
+    <button class="quiz-opt" onclick="answerQuiz(this,false)">50%</button>
+    <button class="quiz-opt" onclick="answerQuiz(this,true)">70%</button>
+    <button class="quiz-opt" onclick="answerQuiz(this,false)">90%</button>
+  </div>
+</div>
+
+<!-- ████ SCREEN: MAP ████ -->
+<div id="s-map" class="s" style="flex-direction:column;background:#e8e8e8;">
+  <!-- Floating controls -->
+  <div style="position:absolute;top:calc(var(--st)+12px);left:12px;right:12px;z-index:1000;display:flex;flex-direction:column;gap:8px;">
+    <div style="display:flex;gap:8px;">
+      <button style="width:40px;height:40px;border-radius:50%;background:#fff;border:none;color:#000;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.2);" onclick="goBack()">‹</button>
+      <div style="flex:1;height:40px;border-radius:20px;background:#fff;border:none;display:flex;align-items:center;padding:0 14px;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,.15);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <span style="font-size:14px;color:#aaa;">Search locations near you...</span>
+      </div>
+    </div>
+    <!-- Category filter chips -->
+    <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;" id="map-filter-row">
+      <button onclick="filterMap('all',this)" class="map-chip on">All</button>
+      <button onclick="filterMap('food',this)" class="map-chip">🥫 Food</button>
+      <button onclick="filterMap('outdoors',this)" class="map-chip">🌳 Outdoors</button>
+      <button onclick="filterMap('shelter',this)" class="map-chip">🏠 Shelter</button>
+      <button onclick="filterMap('health',this)" class="map-chip">🏥 Health</button>
+    </div>
+  </div>
+  <!-- Leaflet map -->
+  <div id="leaflet-map" style="flex:1;width:100%;min-height:200px;"></div>
+  <!-- Bottom sheet - white, Figma style -->
+  <div style="background:#fff;border-radius:20px 20px 0 0;flex-shrink:0;box-shadow:0 -4px 20px rgba(0,0,0,.12);">
+    <div style="width:40px;height:4px;border-radius:2px;background:var(--g2);margin:10px auto 0;"></div>
+    <div id="map-card" style="padding:12px 20px 8px;"></div>
+    <div id="map-provider-list" style="display:flex;gap:10px;overflow-x:auto;padding:0 20px 16px;">
+    </div>
+  </div>
+</div>
+<style>
+.map-chip{height:30px;border-radius:15px;border:none;background:rgba(255,255,255,.92);color:#333;font-size:12px;font-weight:700;padding:0 12px;cursor:pointer;white-space:nowrap;font-family:var(--font);box-shadow:0 1px 4px rgba(0,0,0,.15);}
+.map-chip.on{background:#2D5BF7;color:#fff;}
+#map-filter-row::-webkit-scrollbar{display:none;}
+#map-provider-list::-webkit-scrollbar{display:none;}
+</style>
+
+<!-- ████ SCREEN: SUPPORT HOTLINES ████ -->
+<div id="s-support" class="s" style="background:#fff;">
+  <div class="sb-light"><span>9:41</span><div class="sb-icons" style="color:#000;">●●●</div></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 20px 14px;border-bottom:1px solid var(--g2);">
+    <h2 style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--navy);">Support Hotlines</h2>
+    <button style="width:34px;height:34px;border-radius:50%;background:var(--g1);border:none;cursor:pointer;font-size:16px;">✕</button>
+  </div>
+  <div class="scroll">
+    <div class="hotline-section">
+      <div class="hotline-title">Recovery Coach</div>
+      <div class="hotline-desc">Call for help with public housing applications, eligibility, and tenant support.</div>
+      <div class="hotline-hours">HOURS: Monday–Friday: 9:00 AM–5:00 PM</div>
+      <button class="hotline-call-btn" onclick="showToast('Calling (617) 988-4000...')">Call (617) 988-4000</button>
+    </div>
+    <div class="hotline-divider"></div>
+    <div class="hotline-section">
+      <div class="hotline-title">24/7 Support Hotline</div>
+      <div class="hotline-desc">Call for help with public housing applications, eligibility, and tenant support.</div>
+      <div class="hotline-hours">HOURS: Open 24 hours a day, 7 days a week</div>
+      <button class="hotline-call-btn" onclick="showToast('Calling (617) 956-9788...')">Call (617) 956-9788</button>
+    </div>
+    <div class="hotline-divider"></div>
+    <div class="hotline-section" style="padding-bottom:calc(var(--sb)+20px);">
+      <div class="hotline-title">Boston Recovery Center</div>
+      <div class="hotline-desc">Call for help with public housing applications, eligibility, and tenant support.</div>
+      <div class="hotline-hours">HOURS: Mon–Fri: 9 AM–5 PM · Sat: 12–3 PM · Sun: Closed</div>
+      <button class="hotline-call-btn" onclick="showToast('Calling (617) 665-3333...')">Call (617) 665-3333</button>
+    </div>
+  </div>
+</div>
+
+<!-- ████ SCREEN: SCAN QR ████ -->
+<div id="s-scanqr" class="s" style="background:#111;">
+  <div style="padding:calc(var(--st)+12px) 20px 12px;display:flex;align-items:center;gap:12px;">
+    <button style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="nav('home')">‹</button>
+    <span style="font-family:var(--font);font-size:18px;font-weight:700;color:#fff;flex:1;text-align:center;">Scan QR</span>
+    <div style="width:36px;"></div>
+  </div>
+  <div class="qr-viewfinder">
+    <div class="qr-frame">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="10" width="30" height="30" fill="none" stroke="#000" stroke-width="4"/>
+        <rect x="15" y="15" width="20" height="20" fill="#000"/>
+        <rect x="60" y="10" width="30" height="30" fill="none" stroke="#000" stroke-width="4"/>
+        <rect x="65" y="15" width="20" height="20" fill="#000"/>
+        <rect x="10" y="60" width="30" height="30" fill="none" stroke="#000" stroke-width="4"/>
+        <rect x="15" y="65" width="20" height="20" fill="#000"/>
+        <rect x="60" y="50" width="8" height="8" fill="#000"/><rect x="70" y="50" width="8" height="8" fill="#000"/>
+        <rect x="80" y="50" width="10" height="8" fill="#000"/><rect x="60" y="60" width="8" height="8" fill="#000"/>
+        <rect x="70" y="60" width="20" height="8" fill="#000"/><rect x="60" y="70" width="8" height="8" fill="#000"/>
+        <rect x="72" y="70" width="8" height="8" fill="#000"/><rect x="82" y="70" width="8" height="8" fill="#000"/>
+        <rect x="60" y="80" width="18" height="10" fill="#000"/><rect x="82" y="82" width="8" height="8" fill="#000"/>
+      </svg>
+    </div>
+    <div style="position:absolute;bottom:20px;color:rgba(255,255,255,.6);font-size:14px;text-align:center;width:100%;padding:0 40px;">SCAN HERE</div>
+    <button style="position:absolute;bottom:80px;left:50%;transform:translateX(-50%);width:64px;height:64px;border-radius:50%;background:#fff;border:none;cursor:pointer;font-size:28px;display:flex;align-items:center;justify-content:center;" onclick="showToast('QR scanned ✓')">📷</button>
+  </div>
+</div>
+
+<!-- ████ CHECK-IN MODAL (overlay) ████ -->
+<div id="checkin-modal" style="display:none;position:absolute;inset:0;background:rgba(0,0,20,.75);z-index:800;flex-direction:column;align-items:center;justify-content:flex-end;">
+  <div class="modal-sheet" style="position:relative;">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeCheckin()">✕</button>
+    <div class="modal-title-dark">Check In</div>
+    <div class="ci-tabs">
+      <button class="ci-tab on" id="ci-tab-sig" onclick="showCiTab('sig')">✏️ Signature<span class="tab-badge" id="ci-badge-sig">Assigned</span></button>
+      <button class="ci-tab" id="ci-tab-loc" onclick="showCiTab('loc')">📍 Location<span class="tab-badge" id="ci-badge-loc">Assigned</span></button>
+      <button class="ci-tab" id="ci-tab-qr" onclick="showToast('QR Code scanning coming soon')">QR<span class="tab-badge" style="background:#ccc;">—</span></button>
+    </div>
+    <div id="ci-sig-panel">
+      <div class="attest-text">I attest that I am here, February 1st at 12pm at Boys &amp; Girls Clubs of Boston</div>
+      <div class="sig-area" id="sig-area" onclick="initSig(this)">
+        <span class="sig-hint" id="sig-hint">Sign here</span>
+        <canvas class="sig-canvas" id="sig-canvas"></canvas>
+      </div>
+      <div style="padding:14px 20px 4px;" id="ci-sig-btn-wrap" style="display:none;">
+        <button class="btn" onclick="ciSigConfirm()">Confirm</button>
+      </div>
+    </div>
+    <div id="ci-loc-panel" style="display:none;">
+      <div class="loc-illus">
+        <div class="loc-circle" id="loc-circle-icon">🧍</div>
+        <div class="loc-title" id="loc-illus-title">MEA needs your location</div>
+        <div class="loc-sub">MEA never tracks your location continuously, only when you are in one place and at one time</div>
+      </div>
+      <div style="padding:4px 20px 8px;">
+        <button class="btn" id="loc-action-btn" onclick="shareLocation()">Share location</button>
+      </div>
+    </div>
+    <div style="height:8px;"></div>
+  </div>
+</div>
+
+<!-- ████ CHECK-OUT MODAL (overlay) ████ -->
+<div id="checkout-modal" style="display:none;position:absolute;inset:0;background:rgba(0,0,20,.75);z-index:800;flex-direction:column;align-items:center;justify-content:flex-end;">
+  <div class="modal-sheet" style="position:relative;">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeCheckout()">✕</button>
+    <div class="modal-title-out">Check Out</div>
+    <div class="ci-tabs">
+      <button class="ci-tab on" id="co-tab-sig" onclick="showCoTab('sig')">✏️ Signature<span class="tab-badge" id="co-badge-sig">Assigned</span></button>
+      <button class="ci-tab" id="co-tab-loc" onclick="showCoTab('loc')">📍 Location<span class="tab-badge" id="co-badge-loc">Assigned</span></button>
+      <button class="ci-tab" id="co-tab-photo" onclick="showCoTab('photo')">📸 Photo<span class="tab-badge" id="co-badge-photo">Assigned</span></button>
+    </div>
+    <div id="co-sig-panel">
+      <div class="attest-text">I attest that I am here, February 1st at 12pm at Boys &amp; Girls Clubs of Boston</div>
+      <div class="sig-area" onclick="initSig2(this)">
+        <span class="sig-hint" id="sig2-hint">Sign here</span>
+        <canvas class="sig-canvas" id="sig2-canvas"></canvas>
+      </div>
+      <div style="padding:14px 20px 4px;" id="co-sig-btn-wrap"></div>
+    </div>
+    <div id="co-loc-panel" style="display:none;">
+      <div class="loc-illus">
+        <div class="loc-circle" id="co-loc-icon">🧍</div>
+        <div class="loc-title" id="co-loc-title">MEA needs your location</div>
+        <div class="loc-sub">MEA never tracks your location continuously, only when you are in one place and at one time</div>
+      </div>
+      <div style="padding:4px 20px 8px;"><button class="btn" id="co-loc-btn" onclick="coShareLocation()">Share location</button></div>
+    </div>
+    <div id="co-photo-panel" style="display:none;">
+      <div class="loc-illus">
+        <div style="width:100%;height:200px;border:2px dashed var(--g2);border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;cursor:pointer;position:relative;background:#f0f2fa;" id="co-photo-area" onclick="coActivateCamera()">
+          <div style="font-size:40px;">📷</div>
+          <div style="font-size:15px;font-weight:600;color:var(--g4);">Tap to open camera</div>
+        </div>
+      </div>
+      <div style="padding:4px 20px 8px;"><button class="btn" id="co-photo-btn" onclick="coActivateCamera()">Open Camera</button></div>
+    </div>
+    <div style="height:8px;"></div>
+  </div>
+</div>
+
+
+<!-- ████ BOTTOM TAB BAR ████ -->
+<div id="bottom-tab" style="display:none;position:absolute;bottom:0;left:0;right:0;z-index:700;background:#0A0F30;border-top:1px solid rgba(255,255,255,.08);flex-direction:row;align-items:stretch;padding-bottom:var(--sb);">
+  <button id="tab-home" onclick="nav('home')" style="flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:rgba(255,255,255,.4);padding:10px 0;font-family:var(--font);">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span style="font-size:10px;font-weight:700;letter-spacing:.2px;">Home</span>
+  </button>
+  <button id="tab-tasks" onclick="nav('tasks')" style="flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:rgba(255,255,255,.4);padding:10px 0;font-family:var(--font);">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M9 16l2 2 4-4"/></svg>
+    <span style="font-size:10px;font-weight:700;letter-spacing:.2px;">Tasks</span>
+  </button>
+  <button id="tab-map" onclick="nav('map')" style="flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:rgba(255,255,255,.4);padding:10px 0;font-family:var(--font);">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    <span style="font-size:10px;font-weight:700;letter-spacing:.2px;">Map</span>
+  </button>
+  <button id="tab-chats" onclick="nav('chats')" style="flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:rgba(255,255,255,.4);padding:10px 0;font-family:var(--font);position:relative;">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    <div style="position:absolute;top:8px;right:calc(50% - 16px);width:8px;height:8px;border-radius:50%;background:#E53E3E;border:1.5px solid #0A0F30;"></div>
+    <span style="font-size:10px;font-weight:700;letter-spacing:.2px;">Chats</span>
+  </button>
+</div>
+
+<!-- ████ MENU DRAWER ████ -->
+<div id="menu-overlay" style="display:none;position:absolute;inset:0;z-index:900;" onclick="closeMenu()"></div>
+<div id="menu-drawer" style="display:none;position:absolute;top:0;left:0;bottom:0;width:80%;max-width:300px;background:#0A0F30;z-index:901;flex-direction:column;padding-top:var(--st);">
+  <div style="padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);">
+    <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#2D5BF7,#144BD8);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:10px;">👤</div>
+    <div style="font-family:var(--font);font-size:18px;font-weight:700;color:#fff;">Orazio Rispo</div>
+    <div style="font-size:13px;color:rgba(255,255,255,.45);margin-top:2px;">Case #MA-2026-048291</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:12px 0;">
+    <div onclick="closeMenu();nav('home')" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;color:rgba(255,255,255,.85);font-size:15px;font-weight:600;">🏠 Dashboard</div>
+    <div onclick="closeMenu();nav('tasks')" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;color:rgba(255,255,255,.85);font-size:15px;font-weight:600;">📋 Browse Tasks</div>
+    <div onclick="closeMenu();nav('map')" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;color:rgba(255,255,255,.85);font-size:15px;font-weight:600;">📍 Map</div>
+    <div onclick="closeMenu();nav('chats')" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;color:rgba(255,255,255,.85);font-size:15px;font-weight:600;">💬 Messages</div>
+    <div onclick="closeMenu();nav('support')" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;color:rgba(255,255,255,.85);font-size:15px;font-weight:600;">📞 Support Hotlines</div>
+    <div style="height:1px;background:rgba(255,255,255,.08);margin:8px 0;"></div>
+    <div onclick="closeMenu();nav('notice')" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;color:rgba(255,255,255,.85);font-size:15px;font-weight:600;">📄 My Citation</div>
+    <div onclick="closeMenu();showToast('Profile settings coming soon')" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;color:rgba(255,255,255,.85);font-size:15px;font-weight:600;">⚙️ Settings</div>
+  </div>
+  <div style="padding:20px;border-top:1px solid rgba(255,255,255,.08);">
+    <div style="font-size:12px;color:rgba(255,255,255,.25);text-align:center;">MEA v1.0 · MA-2026-048291</div>
+  </div>
+</div>
+
+<!-- ████ CONTACTS / CALL MODAL ████ -->
+<div id="contacts-overlay" style="display:none;position:absolute;inset:0;background:rgba(0,0,20,.75);z-index:800;flex-direction:column;align-items:center;justify-content:flex-end;" onclick="event.target===this&&closeContacts()">
+  <div style="background:#0F1540;border-radius:24px 24px 0 0;width:100%;padding:0 0 calc(var(--sb)+12px);animation:sheetUp .3s cubic-bezier(.4,0,.2,1);">
+    <div style="width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.15);margin:10px auto 0;"></div>
+    <div style="font-family:var(--font);font-size:16px;font-weight:700;color:#fff;text-align:center;padding:14px 20px 8px;">Who would you like to call?</div>
+    <div id="contacts-list">
+      <div onclick="placeCall('Recovery Coach','(617) 988-4000')" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;border-top:1px solid rgba(255,255,255,.06);">
+        <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#2D5BF7,#144BD8);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">👤</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:#fff;">Recovery Coach</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:1px;">Marcus Williams · (617) 988-4000</div>
+        </div>
+        <div style="width:36px;height:36px;border-radius:50%;background:#00B67A;display:flex;align-items:center;justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.07 1.18 2 2 0 012.07 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        </div>
+      </div>
+      <div onclick="placeCall('Public Defender','(617) 742-8900')" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;border-top:1px solid rgba(255,255,255,.06);">
+        <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#1A3A6A,#0D1F45);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">⚖️</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:#fff;">Public Defender</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:1px;">Sarah Chen · (617) 742-8900</div>
+        </div>
+        <div style="width:36px;height:36px;border-radius:50%;background:#00B67A;display:flex;align-items:center;justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.07 1.18 2 2 0 012.07 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        </div>
+      </div>
+      <div onclick="placeCall('DA Diversion Office','(617) 619-4000')" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;border-top:1px solid rgba(255,255,255,.06);">
+        <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#3D1A5C,#1A0B2E);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏛️</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:#fff;">DA Diversion Office</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:1px;">Suffolk County · (617) 619-4000</div>
+        </div>
+        <div style="width:36px;height:36px;border-radius:50%;background:#00B67A;display:flex;align-items:center;justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.07 1.18 2 2 0 012.07 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        </div>
+      </div>
+      <div onclick="placeCall('24/7 Support','(617) 956-9788')" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;border-top:1px solid rgba(255,255,255,.06);">
+        <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#004D40,#00251A);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🆘</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:#fff;">24/7 Support Hotline</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:1px;">Always available · (617) 956-9788</div>
+        </div>
+        <div style="width:36px;height:36px;border-radius:50%;background:#00B67A;display:flex;align-items:center;justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.07 1.18 2 2 0 012.07 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        </div>
+      </div>
+    </div>
+    <div style="padding:12px 20px 0;">
+      <button class="btn btn-outline" onclick="closeContacts()" style="border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.7);">Cancel</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+<script>
+// ── Clock ──
+function tick(){const n=new Date();document.querySelectorAll('#clk').forEach(e=>e.textContent=n.getHours()+':'+String(n.getMinutes()).padStart(2,'0'));}
+tick();setInterval(tick,30000);
+
+// ── Navigation ──
+let cur='loading';
+let navHistory=[];
+const ORDER=['loading','splash','language','citation','phone','notice','defender','verify','verified','zip','params','home','tasks','task-detail','calendar','booked','active','chats','chat','course','quiz','map','support','scanqr'];
+const TAB_SCREENS=new Set(['home','tasks','task-detail','calendar','booked','active','chats','chat','course','quiz','map','support','scanqr']);
+const TAB_MAP={home:['home','active'],tasks:['tasks','task-detail','calendar','booked','course','quiz','scanqr'],map:['map'],chats:['chats','chat','support']};
+
+function nav(id){
+  const prev=document.getElementById('s-'+cur);
+  const next=document.getElementById('s-'+id);
+  if(!next||prev===next)return;
+  navHistory.push(cur);
+  const pi=ORDER.indexOf(cur),ni=ORDER.indexOf(id);
+  prev.classList.remove('on');
+  next.classList.add('on');
+  next.classList.add(ni>=pi||ni===-1?'in':'back');
+  setTimeout(()=>next.classList.remove('in','back'),300);
+  cur=id;
+  updateTabBar(id);
+  if(id==='map')setTimeout(initMap,420);
+  if(id==='defender')initDefenderChat();
+}
+
+function goBack(){
+  if(!navHistory.length)return;
+  const prev=navHistory.pop();
+  const prevEl=document.getElementById('s-'+prev);
+  const curEl=document.getElementById('s-'+cur);
+  if(!prevEl||!curEl)return;
+  curEl.classList.remove('on');
+  prevEl.classList.add('on');
+  prevEl.classList.add('back');
+  setTimeout(()=>prevEl.classList.remove('back'),300);
+  cur=prev;
+  updateTabBar(prev);
+}
+
+function updateTabBar(id){
+  const bar=document.getElementById('bottom-tab');
+  if(!bar)return;
+  const show=TAB_SCREENS.has(id);
+  bar.style.display=show?'flex':'none';
+  const tabH=show?'calc(54px + var(--sb))':'0px';
+  document.getElementById('app').style.setProperty('--tab-h',tabH);
+  ['home','tasks','map','chats'].forEach(t=>{
+    const btn=document.getElementById('tab-'+t);
+    if(!btn)return;
+    const active=(TAB_MAP[t]||[t]).includes(id);
+    btn.style.color=active?'#2D5BF7':'rgba(255,255,255,.4)';
+  });
+}
+
+// Swipe-back gesture (right swipe from left edge)
+let _swX=0,_swY=0;
+document.addEventListener('DOMContentLoaded',()=>{
+  const app=document.getElementById('app');
+  app.addEventListener('touchstart',e=>{_swX=e.touches[0].clientX;_swY=e.touches[0].clientY;},{passive:true});
+  app.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-_swX;
+    const dy=Math.abs(e.changedTouches[0].clientY-_swY);
+    if(dx>60&&dy<50&&_swX<50)goBack();
+  },{passive:true});
+});
+
+// Auto-advance loading
+setTimeout(()=>nav('splash'),1200);
+
+// ── OTP citation ──
+let otpVal=[];
+function otpKey(n){if(otpVal.length>=6)return;otpVal.push(n);renderOtp();}
+function otpDel(){otpVal.pop();renderOtp();}
+function renderOtp(){
+  for(let i=0;i<6;i++){
+    const b=document.getElementById('otp'+i);
+    b.textContent=otpVal[i]!==undefined?otpVal[i]:'';
+    b.className='otp-box'+(i<otpVal.length?' filled':'')+(i===otpVal.length?' active':'');
+  }
+  const btn=document.getElementById('otp-continue-btn');
+  if(btn){
+    const ready=otpVal.length===6;
+    btn.style.opacity=ready?'1':'.35';
+    btn.style.pointerEvents=ready?'auto':'none';
+  }
+}
+
+// ── OTP phone ──
+let otp2Val=[];
+function otp2Key(n){if(otp2Val.length>=6)return;otp2Val.push(n);renderOtp2();}
+function otp2Del(){otp2Val.pop();renderOtp2();}
+function renderOtp2(){
+  for(let i=0;i<6;i++){
+    const b=document.getElementById('otp2-'+i);
+    b.textContent=otp2Val[i]!==undefined?otp2Val[i]:'';
+    b.className='otp-box'+(i<otp2Val.length?' filled':'')+(i===otp2Val.length?' active':'');
+  }
+  const btn=document.getElementById('otp2-continue-btn');
+  if(btn){
+    const ready=otp2Val.length===6;
+    btn.style.opacity=ready?'1':'.35';
+    btn.style.pointerEvents=ready?'auto':'none';
+  }
+}
+
+// ── Task params toggles ──
+const PARAMS=[{l:'Outdoor work',on:true},{l:'Heavy weights',on:false},{l:'Cleaning',on:true},{l:'Wheelchair Accessible',on:false}];
+function renderParams(){
+  const c=document.getElementById('params-rows');
+  if(!c)return;
+  c.innerHTML=PARAMS.map((p,i)=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--g2);" onclick="toggleParam(${i})">
+      <span style="font-size:16px;font-weight:500;color:var(--navy);">${p.l}</span>
+      <div style="width:50px;height:28px;border-radius:14px;background:${p.on?'var(--green)':'var(--g2)'};position:relative;transition:background .2s;">
+        <div style="position:absolute;top:3px;${p.on?'right:3px':'left:3px'};width:22px;height:22px;border-radius:50%;background:#fff;transition:all .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);"></div>
+      </div>
+    </div>`).join('');
+}
+function toggleParam(i){PARAMS[i].on=!PARAMS[i].on;renderParams();}
+document.addEventListener('DOMContentLoaded',renderParams);
+setTimeout(renderParams,100);
+
+// ── Calendar ──
+function selDay(el){document.querySelectorAll('.cal-day.selected').forEach(d=>d.classList.remove('selected'));el.classList.add('selected');}
+function selSlot(el){document.querySelectorAll('.time-slot.selected').forEach(s=>s.classList.remove('selected'));el.classList.add('selected');}
+
+// ── Location ──
+function activateLocation(){
+  const d=document.getElementById('loc-dot');
+  const t=document.getElementById('loc-text');
+  if(d.classList.contains('active')){d.classList.remove('active');t.textContent='Location sharing is inactive';}
+  else{d.classList.add('active');t.textContent='Location sharing is active';showToast('📍 Location is now active');}
+}
+
+// ── Timer ──
+let timerSec=25,timerRunning=false,timerInterval;
+function startTimer(){
+  if(timerRunning)return;timerRunning=true;
+  timerInterval=setInterval(()=>{timerSec++;updateTimer();},1000);
+}
+function updateTimer(){
+  const m=Math.floor(timerSec/60),s=timerSec%60;
+  const el=document.getElementById('timer-display');
+  if(el)el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+
+// ── Check In / Check Out modals ──
+function openCheckin(){
+  const m=document.getElementById('checkin-modal');
+  m.style.display='flex';
+  document.getElementById('loc-dot').classList.add('active');
+  document.getElementById('loc-text').textContent='Location sharing is active';
+  startTimer();
+  setTimeout(()=>nav('active'),100);
+}
+function closeCheckin(){document.getElementById('checkin-modal').style.display='none';}
+function openCheckout(){document.getElementById('checkout-modal').style.display='flex';}
+function closeCheckout(){document.getElementById('checkout-modal').style.display='none';}
+
+// Check In tabs
+let ciSigDone=false,ciLocDone=false;
+function showCiTab(t){
+  ['sig','loc'].forEach(x=>{
+    document.getElementById('ci-'+x+'-panel').style.display=t===x?'block':'none';
+    document.getElementById('ci-tab-'+x).className='ci-tab'+(t===x?' on':'');
+  });
+}
+function ciSigConfirm(){
+  ciSigDone=true;
+  document.getElementById('ci-badge-sig').textContent='Passed';
+  document.getElementById('ci-badge-sig').className='tab-badge pass';
+  showCiTab('loc');
+  document.getElementById('ci-tab-sig').className='ci-tab';
+  document.getElementById('ci-tab-loc').className='ci-tab on';
+}
+function shareLocation(){
+  ciLocDone=true;
+  document.getElementById('loc-circle-icon').textContent='✅';
+  document.getElementById('loc-illus-title').textContent='Your location is sharing';
+  document.getElementById('loc-action-btn').textContent='Check In ✓';
+  document.getElementById('loc-action-btn').setAttribute('onclick','finalCheckin()');
+  document.getElementById('ci-badge-loc').textContent='Passed';
+  document.getElementById('ci-badge-loc').className='tab-badge pass';
+}
+function finalCheckin(){closeCheckin();showToast('✅ Checked in successfully!');}
+
+// Check Out tabs
+let coSigDone=false,coLocDone=false,coPhotoDone=false;
+function showCoTab(t){
+  ['sig','loc','photo'].forEach(x=>{
+    document.getElementById('co-'+x+'-panel').style.display=t===x?'block':'none';
+    document.getElementById('co-tab-'+x).className='ci-tab'+(t===x?' on':'');
+  });
+}
+function coShareLocation(){
+  coLocDone=true;
+  document.getElementById('co-loc-icon').textContent='✅';
+  document.getElementById('co-loc-title').textContent='Your location is sharing';
+  document.getElementById('co-loc-btn').textContent='Continue →';
+  document.getElementById('co-loc-btn').setAttribute('onclick',"showCoTab('photo')");
+  document.getElementById('co-badge-loc').textContent='Passed';
+  document.getElementById('co-badge-loc').className='tab-badge pass';
+}
+// ── Camera / photo ──
+let _camStream=null;
+function coActivateCamera(){
+  const area=document.getElementById('co-photo-area');
+  const btn=document.getElementById('co-photo-btn');
+  if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    // HTTP (non-localhost) blocks camera — show placeholder
+    coShowPlaceholder(area,btn); return;
+  }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false})
+    .then(stream=>{
+      _camStream=stream;
+      area.innerHTML='';
+      area.onclick=null;
+      const vid=document.createElement('video');
+      vid.autoplay=true;vid.playsinline=true;vid.muted=true;
+      vid.style.cssText='width:100%;height:100%;object-fit:cover;';
+      area.appendChild(vid);
+      vid.srcObject=stream;
+      btn.textContent='Capture →';
+      btn.onclick=function(){coCapture(vid,area,btn);};
+    })
+    .catch(()=>coShowPlaceholder(area,btn));
+}
+function coCapture(vid,area,btn){
+  if(_camStream){_camStream.getTracks().forEach(t=>t.stop());_camStream=null;}
+  const canvas=document.createElement('canvas');
+  canvas.width=vid.videoWidth||320;canvas.height=vid.videoHeight||240;
+  canvas.getContext('2d').drawImage(vid,0,0);
+  area.innerHTML='';area.onclick=null;
+  canvas.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:12px;';
+  area.appendChild(canvas);
+  const ts=document.createElement('div');
+  ts.style.cssText='position:absolute;bottom:8px;right:8px;background:rgba(0,182,122,.9);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:8px;';
+  ts.textContent='✓ '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  area.appendChild(ts);
+  btn.textContent='Confirm Check-Out ✓';
+  btn.onclick=coPhotoConfirm;
+  document.getElementById('co-badge-photo').textContent='Passed';
+  document.getElementById('co-badge-photo').className='tab-badge pass';
+}
+function coShowPlaceholder(area,btn){
+  area.innerHTML='<div style="font-size:54px;">🤳</div><div style="font-size:13px;font-weight:700;color:var(--green);margin-top:6px;">Photo Ready ✓</div><div style="font-size:11px;color:var(--g4);margin-top:4px;">'+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</div>';
+  area.onclick=null;
+  btn.textContent='Confirm Check-Out ✓';
+  btn.onclick=coPhotoConfirm;
+  document.getElementById('co-badge-photo').textContent='Passed';
+  document.getElementById('co-badge-photo').className='tab-badge pass';
+}
+
+// ── Progress tracking ──
+let hoursCompleted=0;
+const TOTAL_HOURS=24;
+function coPhotoConfirm(){
+  if(_camStream){_camStream.getTracks().forEach(t=>t.stop());_camStream=null;}
+  closeCheckout();
+  hoursCompleted++;
+  const pct=Math.min(hoursCompleted/TOTAL_HOURS*100,100);
+  document.getElementById('home-hours').textContent=hoursCompleted+'h / '+TOTAL_HOURS+'h completed';
+  document.getElementById('home-bar').style.width=pct+'%';
+  const el=document.getElementById('timer-display');
+  if(el)el.textContent='00:00';
+  timerSec=0;timerRunning=false;clearInterval(timerInterval);
+  showToast('✅ Checked out! '+hoursCompleted+' hour'+(hoursCompleted===1?'':'s')+' logged.');
+}
+
+// ── Signature canvas ──
+function initSig(area){
+  const hint=document.getElementById('sig-hint');
+  const canvas=document.getElementById('sig-canvas');
+  if(canvas._init)return;
+  canvas._init=true;
+  hint.style.display='none';
+  const rect=area.getBoundingClientRect();
+  canvas.width=rect.width;canvas.height=rect.height;
+  const ctx=canvas.getContext('2d');
+  ctx.strokeStyle='#000';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.lineJoin='round';
+  let drawing=false,hasDrawn=false;
+  function pt(e){const r=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top};}
+  canvas.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;const p=pt(e);ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
+  canvas.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;const p=pt(e);ctx.lineTo(p.x,p.y);ctx.stroke();hasDrawn=true;},{passive:false});
+  canvas.addEventListener('touchend',e=>{e.preventDefault();drawing=false;if(hasDrawn){document.getElementById('ci-sig-btn-wrap').innerHTML='<button class="btn" onclick="ciSigConfirm()">Confirm</button>';}},{passive:false});
+  canvas.addEventListener('mousedown',e=>{drawing=true;const p=pt(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
+  canvas.addEventListener('mousemove',e=>{if(!drawing)return;const p=pt(e);ctx.lineTo(p.x,p.y);ctx.stroke();hasDrawn=true;});
+  canvas.addEventListener('mouseup',()=>{drawing=false;if(hasDrawn){document.getElementById('ci-sig-btn-wrap').innerHTML='<button class="btn" onclick="ciSigConfirm()">Confirm</button>';}});
+}
+function initSig2(area){
+  const hint=document.getElementById('sig2-hint');
+  const canvas=document.getElementById('sig2-canvas');
+  if(canvas._init)return;
+  canvas._init=true;
+  hint.style.display='none';
+  const rect=area.getBoundingClientRect();
+  canvas.width=rect.width;canvas.height=rect.height;
+  const ctx=canvas.getContext('2d');
+  ctx.strokeStyle='#000';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.lineJoin='round';
+  let drawing=false,hasDrawn=false;
+  function pt(e){const r=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top};}
+  canvas.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;const p=pt(e);ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
+  canvas.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;const p=pt(e);ctx.lineTo(p.x,p.y);ctx.stroke();hasDrawn=true;},{passive:false});
+  canvas.addEventListener('touchend',e=>{e.preventDefault();drawing=false;if(hasDrawn){document.getElementById('co-sig-btn-wrap').innerHTML='<button class="btn" onclick="coSigConfirm()">Confirm</button>';}},{passive:false});
+  canvas.addEventListener('mousedown',e=>{drawing=true;const p=pt(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
+  canvas.addEventListener('mousemove',e=>{if(!drawing)return;const p=pt(e);ctx.lineTo(p.x,p.y);ctx.stroke();hasDrawn=true;});
+  canvas.addEventListener('mouseup',()=>{drawing=false;if(hasDrawn){document.getElementById('co-sig-btn-wrap').innerHTML='<button class="btn" onclick="coSigConfirm()">Confirm</button>';}});
+}
+function coSigConfirm(){
+  document.getElementById('co-badge-sig').textContent='Passed';
+  document.getElementById('co-badge-sig').className='tab-badge pass';
+  showCoTab('loc');
+  document.getElementById('co-tab-sig').className='ci-tab';
+  document.getElementById('co-tab-loc').className='ci-tab on';
+}
+
+// ── Quiz ──
+function answerQuiz(btn,correct){
+  document.querySelectorAll('.quiz-opt').forEach(b=>{b.disabled=true;b.classList.remove('sel');});
+  btn.classList.add(correct?'correct':'wrong');
+  if(!correct){document.querySelectorAll('.quiz-opt')[2].classList.add('correct');}
+  setTimeout(()=>showToast(correct?'✅ Correct!':'❌ The answer is 70%'),200);
+  setTimeout(()=>nav('course'),1800);
+}
+
+// ── Toast ──
+let _tt;
+function showToast(msg){
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  clearTimeout(_tt);
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  document.getElementById('app').appendChild(t);
+  _tt=setTimeout(()=>{t.style.transition='opacity .25s';t.style.opacity='0';setTimeout(()=>t.remove(),250);},2600);
+}
+
+// ── Leaflet map ──
+const MAP_PROVIDERS=[
+  {name:'Boston Food Bank',lat:42.3318,lng:-71.0994,icon:'🥫',hours:'Mon–Fri 9am–5pm',dist:'0.8 mi',cat:'food',photo:'https://www.gbfb.org/wp-content/uploads/2021/02/gbfbcovid_wh_0377-470x300.jpg',desc:'Sort and pack food donations to support thousands of Boston families.'},
+  {name:'Boys & Girls Clubs of Boston',lat:42.3305,lng:-71.0903,icon:'🏫',hours:'Mon–Fri 12pm–6pm',dist:'2.4 mi',cat:'outdoors',photo:'https://report.bgcb.org/wp-content/uploads/2026/03/Untitled-design-62.png',desc:'Support youth programs and mentor young members in the community.'},
+  {name:'Franklin Park Cleanup',lat:42.3128,lng:-71.0857,icon:'🌳',hours:'Sat–Sun 9am–2pm',dist:'3.1 mi',cat:'outdoors',photo:'https://www.tclf.org/sites/default/files/thumbnails/image/SIG%20IMAGE_Scarboro%20Pond%20Bridge%20-%20Dan%20Tobyne_sig_001.jpg',desc:'Help clean and maintain one of Boston\'s largest and most beloved green spaces.'},
+  {name:'Dorchester Community Garden',lat:42.3032,lng:-71.0643,icon:'🌱',hours:'Daily 8am–6pm',dist:'4.2 mi',cat:'outdoors',photo:'https://thetrustees.org/wp-content/uploads/2020/07/Greenwood-Community-Garden.jpg',desc:'Maintain garden beds, plant seasonal crops, and assist community events.'},
+  {name:'Bowery Mission Shelter',lat:42.3545,lng:-71.0605,icon:'🏠',hours:'Daily 24/7',dist:'5.0 mi',cat:'shelter',photo:'https://assets.bowery.org/filer_public/43/5f/435fe737-d34a-4763-973a-9db5f6e9e858/fy23downloads_branding-section_1200.jpg',desc:'Serve meals and assist staff at Boston\'s longest-running community shelter.'},
+  {name:'Boston Toxicology Center',lat:42.3358,lng:-71.0802,icon:'🏥',hours:'Mon–Fri 8am–4pm',dist:'1.6 mi',cat:'health',photo:'https://www.bmc.org/sites/default/files/styles/full_width_image/public/2024-03/BMC-FeaturedImage.jpg',desc:'Support community health outreach and wellness programs in Roxbury.'},
+];
+let _leafletMap=null,_mapMarkers=[],_mapFilter='all';
+
+function initMap(){
+  if(_leafletMap){setTimeout(()=>_leafletMap.invalidateSize(),100);return;}
+  if(typeof L==='undefined'){setTimeout(initMap,300);return;}
+  const el=document.getElementById('leaflet-map');
+  if(!el||el.offsetHeight<10){setTimeout(initMap,200);return;}
+
+  _leafletMap=L.map('leaflet-map',{zoomControl:false,attributionControl:false})
+    .setView([42.3305,-71.0903],13);
+  // Standard tile matching Figma map style
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(_leafletMap);
+
+  MAP_PROVIDERS.forEach((p)=>{
+    const html=`<div style="width:42px;height:52px;display:flex;flex-direction:column;align-items:center;">
+      <div style="width:42px;height:42px;border-radius:50%;background:#2D5BF7;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 12px rgba(45,91,247,.6);border:2px solid #fff;">
+        ${p.icon}
+      </div>
+      <div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #2D5BF7;margin-top:-1px;"></div>
+    </div>`;
+    const icon=L.divIcon({html,iconSize:[42,52],iconAnchor:[21,52],className:''});
+    const m=L.marker([p.lat,p.lng],{icon}).addTo(_leafletMap);
+    m.on('click',()=>showMapCard(p));
+    _mapMarkers.push({m,p});
+  });
+
+  showMapCard(MAP_PROVIDERS[0]);
+  renderProviderList(MAP_PROVIDERS);
+  setTimeout(()=>_leafletMap.invalidateSize(),150);
+}
+
+function filterMap(cat,btn){
+  _mapFilter=cat;
+  document.querySelectorAll('.map-chip').forEach(c=>c.classList.remove('on'));
+  btn.classList.add('on');
+  const filtered=cat==='all'?MAP_PROVIDERS:MAP_PROVIDERS.filter(p=>p.cat===cat);
+  _mapMarkers.forEach(({m,p})=>{
+    if(cat==='all'||p.cat===cat){m.addTo(_leafletMap);}else{m.removeFrom(_leafletMap);}
+  });
+  renderProviderList(filtered);
+  if(filtered.length)showMapCard(filtered[0]);
+}
+
+function showMapCard(p){
+  document.getElementById('map-card').innerHTML=`
+    <div style="border-radius:14px;overflow:hidden;margin-bottom:12px;position:relative;height:110px;">
+      <img src="${p.photo}" style="width:100%;height:100%;object-fit:cover;display:block;">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,20,.75),transparent 50%);"></div>
+      <div style="position:absolute;bottom:10px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-end;">
+        <div>
+          <div style="font-family:var(--font);font-size:14px;font-weight:700;color:#fff;">${p.name}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:1px;">📍 ${p.dist} away · ${p.hours}</div>
+        </div>
+        <button style="background:#2D5BF7;border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:700;padding:7px 13px;cursor:pointer;flex-shrink:0;font-family:var(--font);white-space:nowrap;" onclick="nav('task-detail')">Book →</button>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--g4);line-height:1.5;margin:0;">${p.desc}</p>`;
+}
+
+function renderProviderList(providers){
+  const el=document.getElementById('map-provider-list');
+  if(!el)return;
+  el.innerHTML=providers.map((p)=>`
+    <div onclick="showMapCard(MAP_PROVIDERS.find(x=>x.name==='${p.name.replace(/'/g,"\\'")}'));if(_leafletMap)_leafletMap.setView([${p.lat},${p.lng}],15);" style="min-width:130px;background:#fff;border-radius:14px;overflow:hidden;cursor:pointer;flex-shrink:0;border:1px solid var(--g2);box-shadow:0 2px 8px rgba(0,0,0,.06);">
+      <div style="height:65px;overflow:hidden;position:relative;">
+        <img src="${p.photo}" style="width:100%;height:100%;object-fit:cover;display:block;">
+      </div>
+      <div style="padding:7px 10px 9px;">
+        <div style="font-size:11px;font-weight:700;color:var(--navy);line-height:1.3;">${p.name}</div>
+        <div style="font-size:10px;color:var(--blue);font-weight:600;margin-top:2px;">📍 ${p.dist}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── Public Defender chat ──
+const DEFENDER_MSGS=[
+  {from:'pd',text:"Hi, I'm your assigned public defender, Sarah Chen. I'm here to help you understand your options with MEA. What questions do you have?",time:'9:41 AM'},
+  {from:'me',text:"What happens if I don't complete my hours?",time:'9:42 AM'},
+  {from:'pd',text:"If you don't complete your community service hours within the agreed timeline, the case may be referred back to the DA's office for traditional prosecution. MEA makes it easy to stay on track with reminders and flexible scheduling.",time:'9:42 AM'},
+  {from:'me',text:"Will this show up on my record?",time:'9:43 AM'},
+  {from:'pd',text:"Successful completion of MEA means no criminal record. The citation is diverted — not prosecuted. This is a significant benefit, especially for first-time offenses like yours.",time:'9:43 AM'},
+  {from:'pd',text:"Any other questions? I'm available Monday–Friday, 9am–5pm.",time:'9:44 AM'},
+];
+function initDefenderChat(){
+  const c=document.getElementById('defender-chat');
+  if(!c||c._init)return;
+  c._init=true;
+  c.innerHTML=DEFENDER_MSGS.map(m=>m.from==='pd'?
+    `<div class="bubble-wrap them"><div class="b-avatar" style="background:var(--navy);">⚖️</div><div><div class="bubble them">${m.text}</div><div class="bubble-time">${m.time}</div></div></div>`:
+    `<div class="bubble-wrap me"><div class="bubble me">${m.text}</div><div class="bubble-time">${m.time}</div></div>`
+  ).join('');
+  setTimeout(()=>c.scrollTop=c.scrollHeight,50);
+}
+
+// ── Menu drawer ──
+function openMenu(){
+  document.getElementById('menu-overlay').style.display='block';
+  const d=document.getElementById('menu-drawer');
+  d.style.display='flex';
+  d.style.transform='translateX(-100%)';
+  requestAnimationFrame(()=>{d.style.transition='transform .25s ease';d.style.transform='translateX(0)';});
+}
+function closeMenu(){
+  const d=document.getElementById('menu-drawer');
+  d.style.transform='translateX(-100%)';
+  setTimeout(()=>{d.style.display='none';document.getElementById('menu-overlay').style.display='none';},250);
+}
+
+// ── Contacts / Call modal ──
+function openContacts(){
+  const o=document.getElementById('contacts-overlay');
+  o.style.display='flex';
+}
+function closeContacts(){
+  document.getElementById('contacts-overlay').style.display='none';
+}
+function placeCall(name,number){
+  closeContacts();
+  showToast('📞 Calling '+name+'...');
+  setTimeout(()=>window.open('tel:'+number.replace(/[^0-9+]/g,''))&&true,300);
+}
+
+// ── PWA ──
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
