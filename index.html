@@ -655,8 +655,8 @@ canvas.sig-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:
     <div style="width:36px;"></div>
   </div>
   <!-- Camera viewfinder with hand-held ID card — exact Figma image -->
-  <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
-    <img src="assets/images/scan-id-card.png" style="width:100%;height:100%;object-fit:cover;">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#2a2018;">
+    <img src="assets/images/scan-id-card.png" style="width:85%;height:auto;object-fit:contain;">
   </div>
   <!-- Shutter button -->
   <div style="flex-shrink:0;display:flex;justify-content:center;padding:20px 0 calc(var(--sb)+32px);">
@@ -2374,11 +2374,11 @@ function initMap(){
 
   _leafletMap=L.map('leaflet-map',{zoomControl:false,attributionControl:false})
     .setView([42.3305,-71.0903],13);
-  // Standard tile matching Figma map style
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(_leafletMap);
+  // Clean map style matching app design
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'&copy; <a href="https://carto.com/">CARTO</a>'}).addTo(_leafletMap);
 
   MAP_PROVIDERS.forEach((p)=>{
-    const html=`<div style="width:24px;height:24px;border-radius:50%;background:#E87040;border:3px solid rgba(232,112,64,.3);box-shadow:0 2px 8px rgba(232,112,64,.4);"></div>`;
+    const html=`<div style="width:28px;height:28px;border-radius:50%;background:#3B6BF5;border:3px solid rgba(59,107,245,.25);box-shadow:0 2px 10px rgba(59,107,245,.4);"></div>`;
     const icon=L.divIcon({html,iconSize:[24,24],iconAnchor:[12,12],className:''});
     const m=L.marker([p.lat,p.lng],{icon}).addTo(_leafletMap);
     m.on('click',()=>showMapCard(p));
