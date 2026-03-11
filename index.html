@@ -17,6 +17,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.mea-logo{display:block;margin:0 auto;width:auto !important;object-fit:contain !important;}
 :root{
   --dark:#060A1E;
   --dark2:#0A0F30;
@@ -316,7 +317,7 @@ canvas.sig-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:
   <div style="position:absolute;inset:0;background:url('assets/images/splash-bg.jpg') center/cover no-repeat;"></div>
   <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,10,30,.55) 0%,rgba(6,10,30,.25) 40%,rgba(6,10,30,.7) 75%,rgba(6,10,30,.95) 100%);"></div>
   <div style="position:relative;z-index:2;flex:1;display:flex;flex-direction:column;padding:calc(var(--st)+20px) 0 0;">
-    <div style="text-align:center;padding:0 20px;"><img src="assets/images/mea-logo.png" style="height:64px;width:auto;" alt="MEA"></div>
+    <div style="text-align:center;padding:0 20px;"><img class="mea-logo" src="assets/images/mea-logo.png" style="height:36px !important;max-height:36px !important;max-width:120px !important;" alt="MEA"></div>
     <div style="padding:40px 24px 0;">
       <div style="font-family:var(--font);font-size:64px;font-weight:700;color:#fff;line-height:1.08;letter-spacing:-2px;">Fair.<br>Safe.<br>Just.</div>
     </div>
@@ -629,16 +630,16 @@ canvas.sig-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:
 </div>
 
 <!-- ████ SCREEN: SELFIE CAPTURED ████ -->
-<div id="s-selfie-result" class="s" style="background:var(--dark);">
+<div id="s-selfie-result" class="s" style="background:linear-gradient(180deg,#060A1E 0%,#0A1040 50%,#060A1E 100%);">
   <div class="sb-dark"><span>9:41</span><div class="sb-icons">●●●</div></div>
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 32px 20px;">
-    <div style="width:180px;height:180px;border-radius:50%;overflow:hidden;border:3px solid rgba(255,255,255,.15);margin-bottom:28px;box-shadow:0 0 60px rgba(0,0,40,.4);">
-      <img src="https://images.pexels.com/photos/8217533/pexels-photo-8217533.jpeg?auto=compress&cs=tinysrgb&w=600" style="width:100%;height:100%;object-fit:cover;object-position:center 20%;">
+    <div style="width:220px;height:220px;border-radius:50%;overflow:hidden;border:3px solid rgba(255,255,255,.12);margin-bottom:32px;box-shadow:0 0 80px rgba(60,100,255,.15),0 0 40px rgba(0,0,40,.5);">
+      <img src="assets/images/selfie-confirmation.png" style="width:100%;height:100%;object-fit:cover;object-position:center 20%;">
     </div>
-    <h2 style="font-family:var(--font);font-size:32px;font-weight:800;color:#fff;text-align:center;letter-spacing:-.8px;" data-i18n="looks_good">Looks good!</h2>
+    <h2 style="font-family:var(--font);font-size:36px;font-weight:700;color:#fff;text-align:center;letter-spacing:-.5px;" data-i18n="looks_good">Looks good!</h2>
   </div>
-  <div style="padding:0 24px calc(var(--sb)+32px);">
-    <button class="btn" onclick="nav('id-capture')" data-i18n="verify_identity">Verify your identity</button>
+  <div style="padding:0 48px calc(var(--sb)+32px);display:flex;justify-content:center;">
+    <button onclick="nav('id-capture')" data-i18n="verify_identity" style="padding:16px 40px;border-radius:28px;border:none;font-family:var(--font);font-size:17px;font-weight:600;color:#fff;cursor:pointer;background:linear-gradient(135deg,rgba(80,130,255,.7),rgba(100,160,255,.4));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 4px 30px rgba(60,100,255,.25),inset 0 1px 0 rgba(255,255,255,.2);letter-spacing:.3px;">Verify your identity</button>
   </div>
 </div>
 
@@ -653,44 +654,9 @@ canvas.sig-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:
     <span style="flex:1;text-align:center;font-family:var(--font);font-size:17px;font-weight:700;color:#fff;" data-i18n="scan_id">Scan ID</span>
     <div style="width:36px;"></div>
   </div>
-  <!-- Camera viewfinder with ID card -->
+  <!-- Camera viewfinder with hand-held ID card — exact Figma image -->
   <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
-    <!-- Simulated camera background -->
-    <div style="position:absolute;inset:0;background:linear-gradient(160deg,#2a1f15 0%,#1a1510 40%,#251c14 100%);"></div>
-    <!-- MA ID Card -->
-    <div style="position:relative;width:320px;height:200px;background:#fff;border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,.5);overflow:hidden;transform:rotate(-2deg);">
-      <!-- Green header band -->
-      <div style="height:28px;background:linear-gradient(90deg,#1a6b4a,#2a8c5a);display:flex;align-items:center;padding:0 10px;">
-        <span style="font-size:7px;font-weight:800;color:#fff;letter-spacing:1.5px;">MASSACHUSETTS</span>
-        <span style="margin-left:auto;font-size:6px;color:rgba(255,255,255,.7);letter-spacing:.5px;">IDENTIFICATION CARD</span>
-      </div>
-      <div style="display:flex;padding:8px 10px;gap:10px;">
-        <!-- Left: Photo + seal -->
-        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-          <div style="width:60px;height:70px;border-radius:3px;background:#d0c8c0;border:1px solid #bbb;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="#999"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
-          </div>
-          <!-- State seal -->
-          <div style="width:36px;height:36px;border-radius:50%;border:1.5px solid #1a6b4a;display:flex;align-items:center;justify-content:center;">
-            <div style="width:28px;height:28px;border-radius:50%;background:rgba(26,107,74,.1);display:flex;align-items:center;justify-content:center;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="#1a6b4a"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>
-            </div>
-          </div>
-        </div>
-        <!-- Right: Info -->
-        <div style="flex:1;font-family:monospace;">
-          <div style="font-size:11px;font-weight:700;color:#222;">JOHN Q. CITIZEN</div>
-          <div style="font-size:8px;color:#555;margin-top:3px;">123 ANYWHERE ST.</div>
-          <div style="font-size:8px;color:#555;">BOSTON, MA 02100</div>
-          <div style="display:flex;gap:16px;margin-top:8px;">
-            <div><div style="font-size:6px;color:#888;">DOB</div><div style="font-size:8px;color:#333;font-weight:600;">04/15/1990</div></div>
-            <div><div style="font-size:6px;color:#888;">SEX</div><div style="font-size:8px;color:#333;font-weight:600;">M</div></div>
-            <div><div style="font-size:6px;color:#888;">EYE</div><div style="font-size:8px;color:#333;font-weight:600;">BRO</div></div>
-          </div>
-          <div style="margin-top:8px;"><div style="font-size:6px;color:#888;">ID</div><div style="font-size:10px;color:#222;font-weight:700;letter-spacing:1px;">987654321</div></div>
-        </div>
-      </div>
-    </div>
+    <img src="assets/images/scan-id-card.png" style="width:100%;height:100%;object-fit:cover;">
   </div>
   <!-- Shutter button -->
   <div style="flex-shrink:0;display:flex;justify-content:center;padding:20px 0 calc(var(--sb)+32px);">
