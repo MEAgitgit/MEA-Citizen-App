@@ -303,7 +303,7 @@ canvas.sig-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:
 <!-- ████ SCREEN: LOADING ████ -->
 <div id="s-loading" class="s on">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--dark);">
-    <span style="font-family:var(--font);font-size:32px;font-weight:800;color:var(--blue);letter-spacing:-1px;">MEA</span>
+    <img src="assets/images/mea-logo.png" style="height:44px;width:auto;" alt="MEA">
   </div>
   <div style="display:flex;justify-content:center;gap:8px;padding-bottom:calc(var(--sb)+30px);background:var(--dark);">
     <div style="width:18px;height:6px;border-radius:3px;background:var(--blue);"></div>
@@ -316,13 +316,13 @@ canvas.sig-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:
   <div style="position:absolute;inset:0;background:url('assets/images/splash-bg.jpg') center/cover no-repeat;"></div>
   <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,10,30,.55) 0%,rgba(6,10,30,.25) 40%,rgba(6,10,30,.7) 75%,rgba(6,10,30,.95) 100%);"></div>
   <div style="position:relative;z-index:2;flex:1;display:flex;flex-direction:column;padding:calc(var(--st)+20px) 0 0;">
-    <div style="text-align:center;padding:0 20px;"><span style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--blue);">MEA</span></div>
+    <div style="text-align:center;padding:0 20px;"><img src="assets/images/mea-logo.png" style="height:64px;width:auto;" alt="MEA"></div>
     <div style="padding:40px 24px 0;">
       <div style="font-family:var(--font);font-size:64px;font-weight:700;color:#fff;line-height:1.08;letter-spacing:-2px;">Fair.<br>Safe.<br>Just.</div>
     </div>
     <div style="flex:1;"></div>
     <div style="padding:0 24px;">
-      <p style="font-size:15px;color:rgba(255,255,255,.7);line-height:1.6;">MEA allows participants to satisfy their obligations to the criminal justice system in a safe, equitable, and rewarding way.</p>
+      <p style="font-size:15px;color:rgba(255,255,255,.7);line-height:1.6;text-align:center;">MEA allows participants to satisfy<br>their obligations to the criminal justice<br>system in a safe, equitable, and rewarding way.</p>
     </div>
     <div style="display:flex;justify-content:center;gap:8px;padding:18px 0 12px;">
       <div style="width:18px;height:6px;border-radius:3px;background:#fff;"></div>
@@ -330,7 +330,7 @@ canvas.sig-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:
       <div style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.3);"></div>
     </div>
     <div style="display:flex;justify-content:center;padding:0 24px calc(var(--sb)+32px);">
-      <button class="btn" style="max-width:240px;" onclick="nav('language')" data-i18n="sign_in">Sign In</button>
+      <button class="btn" style="max-width:240px;" onclick="nav('language')" data-i18n="sign_in">Let's go</button>
     </div>
   </div>
 </div>
@@ -338,7 +338,7 @@ canvas.sig-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:
 <!-- ████ SCREEN: LANGUAGE SELECT ████ -->
 <div id="s-language" class="s" style="background:var(--dark);">
   <div class="sb-dark"><span class="clk">9:41</span><div class="sb-icons">●●●</div></div>
-  <div style="text-align:center;padding:8px 20px 24px;"><span style="font-family:var(--font);font-size:22px;font-weight:800;color:var(--blue);">MEA</span></div>
+  <div style="text-align:center;padding:8px 20px 24px;"><img src="assets/images/mea-logo.png" style="height:30px;width:auto;" alt="MEA"></div>
   <div class="scroll" style="padding:0 24px;">
     <h1 style="font-family:var(--font);font-size:32px;font-weight:800;color:#fff;letter-spacing:-.8px;margin-bottom:28px;">Select preferred<br>language</h1>
     <div style="display:flex;flex-direction:column;gap:12px;padding-bottom:40px;">
@@ -444,20 +444,35 @@ canvas.sig-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:
       <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Evidence Photos (2)</div>
       <div style="display:flex;gap:10px;">
         <div style="flex:1;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.12);">
-          <div style="height:100px;overflow:hidden;"><img src="assets/images/baby-formula.png" style="width:200%;height:100%;object-fit:cover;object-position:left center;" loading="lazy"></div>
+          <div style="height:100px;overflow:hidden;"><img src="assets/images/evidence-formula.jpg" style="width:100%;height:100%;object-fit:cover;" loading="lazy"></div>
           <div style="background:rgba(0,0,20,.7);padding:8px 10px;">
             <div style="font-size:11px;color:rgba(255,255,255,.8);font-weight:600;">Similac Advance Formula</div>
             <div style="display:flex;justify-content:space-between;margin-top:2px;"><span style="font-size:9px;color:rgba(255,255,255,.4);">EVD-001</span><span style="font-size:9px;color:rgba(255,255,255,.4);">$38.99</span></div>
           </div>
         </div>
         <div style="flex:1;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.12);">
-          <div style="height:100px;overflow:hidden;"><img src="assets/images/diapers.png" style="width:200%;height:100%;object-fit:cover;object-position:right center;" loading="lazy"></div>
+          <div style="height:100px;overflow:hidden;"><img src="assets/images/evidence-diapers.jpg" style="width:100%;height:100%;object-fit:cover;" loading="lazy"></div>
           <div style="background:rgba(0,0,20,.7);padding:8px 10px;">
             <div style="font-size:11px;color:rgba(255,255,255,.8);font-weight:600;">Pampers Diapers</div>
             <div style="display:flex;justify-content:space-between;margin-top:2px;"><span style="font-size:9px;color:rgba(255,255,255,.4);">EVD-002</span><span style="font-size:9px;color:rgba(255,255,255,.4);">$24.99</span></div>
           </div>
         </div>
       </div>
+    </div>
+    <!-- Incident Notes -->
+    <div style="padding:20px 24px 0;">
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Incident Notes</div>
+      <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:16px;">
+        <div style="font-size:13px;color:rgba(255,255,255,.75);line-height:1.65;">Defendant was observed concealing two items — baby formula (Similac Advance, $38.99) and diapers (Pampers, $24.99) — inside a reusable bag at CVS, Hampden St Boston. Loss prevention detained at exit. Items recovered intact. Defendant was cooperative and stated items were for personal use. Total value: $63.98.</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:12px;">
+          <div style="font-size:11px;color:rgba(255,255,255,.35);">Officer John Fitzgerald · Boston PD · Jan 15, 2026</div>
+        </div>
+      </div>
+      <!-- Why was I eligible button -->
+      <button onclick="document.getElementById('eligibility-modal').style.display='flex'" style="width:100%;margin-top:14px;padding:14px 18px;border-radius:12px;border:1px solid rgba(74,144,226,.3);background:rgba(74,144,226,.08);color:var(--blue);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Why was I eligible?
+      </button>
     </div>
     <!-- How MEA Works video -->
     <div style="margin:28px 24px 0;border-radius:20px;overflow:hidden;cursor:pointer;position:relative;height:240px;" onclick="showToast('Playing: How MEA Works')">
@@ -467,7 +482,7 @@ canvas.sig-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:
       <div style="position:absolute;top:20px;left:50%;transform:translateX(-50%);width:140px;height:150px;z-index:2;">
         <div style="width:100%;height:100%;border-radius:16px;background:rgba(0,0,20,.7);border:2px solid rgba(255,255,255,.15);overflow:hidden;padding:8px;">
           <div style="font-size:7px;color:rgba(255,255,255,.5);text-align:center;margin-bottom:4px;">13:10</div>
-          <div style="text-align:center;margin-bottom:6px;"><span style="font-family:var(--font);font-size:8px;font-weight:800;color:var(--blue);">MEA</span></div>
+          <div style="text-align:center;margin-bottom:6px;"><img src="assets/images/mea-logo.png" style="height:10px;width:auto;" alt="MEA"></div>
           <div style="background:linear-gradient(135deg,rgba(20,75,216,.3),rgba(0,30,80,.4));border-radius:8px;padding:6px;margin-bottom:4px;">
             <div style="font-size:6px;color:#fff;font-weight:700;">Shoplifting</div>
             <div style="font-size:5px;color:rgba(255,255,255,.5);">0h / 24h</div>
@@ -496,15 +511,75 @@ canvas.sig-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.07 1.18 2 2 0 012.07 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
         Chat with a Public Defender
       </button>
-      <!-- Join MEA - blue -->
-      <button class="btn" onclick="nav('verify')" style="max-width:220px;margin:0 auto;">Join MEA</button>
-      <!-- Watch bodycam -->
-      <button style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:54px;border-radius:27px;border:1.5px solid rgba(255,255,255,.15);background:none;color:rgba(255,255,255,.7);font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;" onclick="showToast('Bodycam video request submitted')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+      <!-- Watch bodycam - light red -->
+      <button style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:54px;border-radius:27px;border:none;background:rgba(220,80,70,.25);color:rgba(255,180,170,.9);font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;" onclick="showToast('Bodycam video request submitted')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,180,170,.7)" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
         Watch bodycam video
       </button>
+      <!-- Join MEA - blue (bottom) -->
+      <button class="btn" onclick="nav('verify')" style="max-width:220px;margin:0 auto;">Join MEA</button>
     </div>
     <div style="height:calc(var(--sb)+40px);"></div>
+  </div>
+</div>
+
+<!-- Eligibility Modal -->
+<div id="eligibility-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:20px;max-width:380px;width:100%;max-height:85vh;overflow-y:auto;padding:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div style="font-family:var(--font);font-size:18px;font-weight:800;color:var(--navy);">Eligibility Determination</div>
+      <span style="background:#ECFDF5;color:#059669;font-size:12px;font-weight:700;padding:5px 12px;border-radius:99px;border:1px solid rgba(5,150,105,.2);display:inline-flex;align-items:center;gap:5px;">
+        <span style="width:7px;height:7px;background:#059669;border-radius:50%;display:inline-block;"></span>EAP Eligible
+      </span>
+    </div>
+    <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:13px;color:#065F46;font-weight:500;">✓ All eligibility criteria met for Emerging Adult Program (EAP). Diversion offer is recommended.</div>
+    <!-- Criteria rows -->
+    <div style="border-top:1px solid #E5E7EB;padding:14px 0;">
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <span style="color:#059669;font-size:16px;font-weight:700;margin-top:1px;">✓</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--navy);">Age 18–25 (Emerging Adult threshold)</div>
+          <div style="font-size:13px;color:#64748B;margin-top:3px;">Defendant is 22 years old — within EAP range</div>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid #E5E7EB;padding:14px 0;">
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <span style="color:#059669;font-size:16px;font-weight:700;margin-top:1px;">✓</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--navy);">Qualifying offense (non-violent, non-firearms)</div>
+          <div style="font-size:13px;color:#64748B;margin-top:3px;">Shoplifting, M.G.L. c.266 § 30A — EAP eligible</div>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid #E5E7EB;padding:14px 0;">
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <span style="color:#059669;font-size:16px;font-weight:700;margin-top:1px;">✓</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--navy);">No disqualifying criminal history</div>
+          <div style="font-size:13px;color:#64748B;margin-top:3px;">Zero prior arraignments or SJC records found</div>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid #E5E7EB;padding:14px 0;">
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <span style="color:#059669;font-size:16px;font-weight:700;margin-top:1px;">✓</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--navy);">No active restraining orders or victim flags</div>
+          <div style="font-size:13px;color:#64748B;margin-top:3px;">No victim identified; no court-issued prohibitions</div>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid #E5E7EB;padding:14px 0;">
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <span style="color:#059669;font-size:16px;font-weight:700;margin-top:1px;">✓</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--navy);">Program capacity available</div>
+          <div style="font-size:13px;color:#64748B;margin-top:3px;">Roca (primary match): 2 open slots · Chelsea Collaborative: 6 open slots</div>
+        </div>
+      </div>
+    </div>
+    <button onclick="document.getElementById('eligibility-modal').style.display='none'" style="width:100%;margin-top:10px;padding:14px;border-radius:12px;border:none;background:var(--blue);color:#fff;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;">Got it</button>
   </div>
 </div>
 
@@ -704,7 +779,7 @@ canvas.sig-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:
         </div>
         <button style="background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="openMenu()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       </div>
-      <span style="font-family:var(--font);font-size:24px;font-weight:800;color:#fff;letter-spacing:-.5px;">MEA</span>
+      <img src="assets/images/mea-logo.png" style="height:30px;width:auto;" alt="MEA">
       <div class="nav-group" style="gap:10px;">
         <button style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="openContacts()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.07 1.18 2 2 0 012.07 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></button>
         <button style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;" onclick="nav('chats')">
@@ -2481,7 +2556,7 @@ const TRANSLATIONS={
     enter_citation:'Enter your<br>citation number',
     confirm_phone:'Confirm your<br>phone number',
     continue_btn:'Continue →',
-    sign_in:'Sign In',
+    sign_in:"Let's go",
     other_sign_in:'Other ways to sign in',
     join_mea:'Join MEA',
     chat_defender:'💬 Chat with Public Defender',
