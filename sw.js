@@ -1,4 +1,4 @@
-const CACHE = 'mea-v17';
+const CACHE = 'mea-v18';
 const ASSETS = ['/', '/index.html', '/assets/images/splash-bg.jpg'];
 
 self.addEventListener('install', e => {

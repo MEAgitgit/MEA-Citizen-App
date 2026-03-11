@@ -18,6 +18,8 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
 .mea-logo{display:block;margin:0 auto;width:auto !important;object-fit:contain !important;}
+.map-tip{background:#1E293B !important;color:#fff !important;border:none !important;border-radius:8px !important;padding:6px 12px !important;font-family:var(--font) !important;font-size:12px !important;font-weight:600 !important;box-shadow:0 4px 16px rgba(0,0,0,.2) !important;}
+.map-tip::before{border-top-color:#1E293B !important;}
 :root{
   --dark:#060A1E;
   --dark2:#0A0F30;
@@ -2357,12 +2359,16 @@ function showToast(msg){
 
 // ── Leaflet map ──
 const MAP_PROVIDERS=[
-  {name:'Boston Food Bank',lat:42.3318,lng:-71.0994,icon:'🥫',hours:'Mon–Fri 9am–5pm',dist:'0.8 mi',cat:'food',photo:'assets/images/boston-food-bank.jpg',desc:'Sort and pack food donations to support thousands of Boston families.'},
-  {name:'Boys & Girls Clubs of Boston',lat:42.3305,lng:-71.0903,icon:'🏫',hours:'Mon–Fri 12pm–6pm',dist:'2.4 mi',cat:'outdoors',photo:'assets/images/bgc-boston.jpg',desc:'Support youth programs and mentor young members in the community.'},
-  {name:'Franklin Park Cleanup',lat:42.3128,lng:-71.0857,icon:'🌳',hours:'Sat–Sun 9am–2pm',dist:'3.1 mi',cat:'outdoors',photo:'assets/images/franklin-park.jpg',desc:'Help clean and maintain one of Boston\'s largest and most beloved green spaces.'},
-  {name:'Dorchester Community Garden',lat:42.3032,lng:-71.0643,icon:'🌱',hours:'Daily 8am–6pm',dist:'4.2 mi',cat:'outdoors',photo:'assets/images/dorchester-garden.jpg',desc:'Maintain garden beds, plant seasonal crops, and assist community events.'},
-  {name:'Bowery Mission Shelter',lat:42.3545,lng:-71.0605,icon:'🏠',hours:'Daily 24/7',dist:'5.0 mi',cat:'shelter',photo:'https://assets.bowery.org/filer_public/43/5f/435fe737-d34a-4763-973a-9db5f6e9e858/fy23downloads_branding-section_1200.jpg',desc:'Serve meals and assist staff at Boston\'s longest-running community shelter.'},
-  {name:'Boston Toxicology Center',lat:42.3358,lng:-71.0802,icon:'🏥',hours:'Mon–Fri 8am–4pm',dist:'1.6 mi',cat:'health',photo:'assets/images/boston-toxicology.jpg',desc:'Support community health outreach and wellness programs in Roxbury.'},
+  {name:'Greater Boston Food Bank',lat:42.3318,lng:-71.0494,icon:'🥫',hours:'Mon–Fri 8am–5pm',dist:'0.8 mi',cat:'food',photo:'assets/images/boston-food-bank.jpg',desc:'Sort and pack food donations at New England\'s largest hunger-relief organization. 70 Summer St, Boston.'},
+  {name:'Gavin Foundation',lat:42.3350,lng:-71.0430,icon:'🏥',hours:'Daily 24/7',dist:'1.2 mi',cat:'health',photo:'assets/images/boston-toxicology.jpg',desc:'Substance use treatment & recovery services. MEA partner for SOS diversion track. 675 E 4th St, South Boston.'},
+  {name:'Chelsea Collaborative',lat:42.3918,lng:-71.0328,icon:'🤝',hours:'Mon–Fri 9am–6pm',dist:'3.8 mi',cat:'service',photo:'assets/images/bgc-boston.jpg',desc:'Immigrant services, workforce development, community advocacy. MEA diversion partner. 318 Broadway, Chelsea.'},
+  {name:'Rosie\'s Place',lat:42.3388,lng:-71.0710,icon:'🏠',hours:'Daily 24/7',dist:'1.5 mi',cat:'shelter',photo:'assets/images/dorchester-garden.jpg',desc:'Women\'s shelter and food pantry — housing stabilization services. 889 Harrison Ave, Boston.'},
+  {name:'Boys & Girls Clubs — Roxbury',lat:42.3263,lng:-71.0857,icon:'🏫',hours:'Mon–Fri 12pm–8pm',dist:'2.1 mi',cat:'outdoors',photo:'assets/images/bgc-boston.jpg',desc:'Youth mentoring and community service placements. 115 Warren St, Roxbury.'},
+  {name:'Franklin Park Coalition',lat:42.3128,lng:-71.0857,icon:'🌳',hours:'Sat–Sun 9am–2pm',dist:'3.1 mi',cat:'outdoors',photo:'assets/images/franklin-park.jpg',desc:'Park cleanup and maintenance volunteer crews. Community service hours available.'},
+  {name:'Suffolk County Probation',lat:42.3601,lng:-71.0589,icon:'⚖️',hours:'Mon–Fri 8:30am–4:30pm',dist:'0.5 mi',cat:'service',photo:'assets/images/boston-toxicology.jpg',desc:'Probation check-ins and program compliance. 24 New Chardon St, Boston.'},
+  {name:'MBTA Community Service — Nubian Sq',lat:42.3292,lng:-71.0842,icon:'🚇',hours:'Mon–Sat 7am–3pm',dist:'2.4 mi',cat:'service',photo:'assets/images/dorchester-garden.jpg',desc:'Graffiti removal and station cleanup crews. Restorative justice mission site.'},
+  {name:'Pine Street Inn',lat:42.3382,lng:-71.0628,icon:'🏠',hours:'Daily 24/7',dist:'1.8 mi',cat:'shelter',photo:'assets/images/boston-food-bank.jpg',desc:'Emergency shelter, job training, and permanent housing for homeless individuals. 444 Harrison Ave.'},
+  {name:'Revere CARES',lat:42.4084,lng:-71.0120,icon:'💊',hours:'Mon–Fri 9am–5pm',dist:'5.6 mi',cat:'health',photo:'assets/images/boston-toxicology.jpg',desc:'Substance abuse prevention and community wellness. Revere PD partner. 300 Ocean Ave, Revere.'},
 ];
 let _leafletMap=null,_mapMarkers=[],_mapFilter='all';
 
@@ -2378,10 +2384,11 @@ function initMap(){
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'&copy; <a href="https://carto.com/">CARTO</a>'}).addTo(_leafletMap);
 
   MAP_PROVIDERS.forEach((p)=>{
-    const html=`<div style="width:28px;height:28px;border-radius:50%;background:#3B6BF5;border:3px solid rgba(59,107,245,.25);box-shadow:0 2px 10px rgba(59,107,245,.4);"></div>`;
-    const icon=L.divIcon({html,iconSize:[24,24],iconAnchor:[12,12],className:''});
+    const html=`<div style="width:32px;height:32px;border-radius:50%;background:#3B6BF5;border:3px solid #fff;box-shadow:0 2px 12px rgba(59,107,245,.45);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:transform .15s;">${p.icon}</div>`;
+    const icon=L.divIcon({html,iconSize:[32,32],iconAnchor:[16,16],className:''});
     const m=L.marker([p.lat,p.lng],{icon}).addTo(_leafletMap);
-    m.on('click',()=>showMapCard(p));
+    m.bindTooltip(p.name,{direction:'top',offset:[0,-18],className:'map-tip'});
+    m.on('click',()=>{showMapCard(p);_leafletMap.setView([p.lat,p.lng],15);renderProviderList([p,...MAP_PROVIDERS.filter(x=>x!==p)]);});
     _mapMarkers.push({m,p});
   });
 
