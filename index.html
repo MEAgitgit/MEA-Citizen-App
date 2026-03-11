@@ -2383,11 +2383,13 @@ function initMap(){
   // Clean map style matching app design
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'&copy; <a href="https://carto.com/">CARTO</a>'}).addTo(_leafletMap);
 
+  const catColors={food:'#E85D3A',health:'#16A34A',shelter:'#D97706',outdoors:'#0891B2',service:'#3B6BF5'};
   MAP_PROVIDERS.forEach((p)=>{
-    const html=`<div style="width:32px;height:32px;border-radius:50%;background:#3B6BF5;border:3px solid #fff;box-shadow:0 2px 12px rgba(59,107,245,.45);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:transform .15s;">${p.icon}</div>`;
-    const icon=L.divIcon({html,iconSize:[32,32],iconAnchor:[16,16],className:''});
+    const bg=catColors[p.cat]||'#3B6BF5';
+    const html=`<div style="width:36px;height:36px;border-radius:50%;background:${bg};border:3px solid #fff;box-shadow:0 2px 14px ${bg}66,0 0 0 4px ${bg}20;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;transition:transform .15s;">${p.icon}</div>`;
+    const icon=L.divIcon({html,iconSize:[36,36],iconAnchor:[18,18],className:''});
     const m=L.marker([p.lat,p.lng],{icon}).addTo(_leafletMap);
-    m.bindTooltip(p.name,{direction:'top',offset:[0,-18],className:'map-tip'});
+    m.bindTooltip(p.name,{direction:'top',offset:[0,-20],className:'map-tip'});
     m.on('click',()=>{showMapCard(p);_leafletMap.setView([p.lat,p.lng],15);renderProviderList([p,...MAP_PROVIDERS.filter(x=>x!==p)]);});
     _mapMarkers.push({m,p});
   });
