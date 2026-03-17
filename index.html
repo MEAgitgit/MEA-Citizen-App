@@ -743,7 +743,7 @@ canvas.sig-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:
     <div class="top-nav" style="padding:10px 16px 14px;">
       <div class="nav-group" style="gap:10px;">
         <div style="width:40px;height:40px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid rgba(255,255,255,.15);">
-          <img src="https://images.pexels.com/photos/8217533/pexels-photo-8217533.jpeg?auto=compress&cs=tinysrgb&w=80" style="width:100%;height:100%;object-fit:cover;object-position:center 20%;">
+          <img src="assets/images/selfie-confirmation.png" style="width:100%;height:100%;object-fit:cover;object-position:center 20%;">
         </div>
         <button style="background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="openMenu()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       </div>
@@ -1548,7 +1548,7 @@ canvas.sig-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:
 <div id="menu-overlay" style="display:none;position:absolute;inset:0;z-index:900;" onclick="closeMenu()"></div>
 <div id="menu-drawer" style="display:none;position:absolute;top:0;left:0;bottom:0;width:80%;max-width:300px;background:#0A0F30;z-index:901;flex-direction:column;padding-top:var(--st);">
   <div style="padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);">
-    <div style="width:52px;height:52px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:10px;overflow:hidden;border:1.5px solid rgba(255,255,255,.15);"><img src="assets/images/mea-logo.png" style="width:38px;height:auto;object-fit:contain;"></div>
+    <div style="width:52px;height:52px;border-radius:50%;overflow:hidden;margin-bottom:10px;border:1.5px solid rgba(255,255,255,.15);"><img src="assets/images/selfie-confirmation.png" style="width:100%;height:100%;object-fit:cover;"></div>
     <div style="font-family:var(--font);font-size:18px;font-weight:700;color:#fff;">Jasmine Santos</div>
     <div style="font-size:13px;color:rgba(255,255,255,.45);margin-top:2px;">Case #MA-2026-048291</div>
   </div>
@@ -1564,6 +1564,8 @@ canvas.sig-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:
     <div onclick="closeMenu();nav('proofs')" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;color:rgba(255,255,255,.85);font-size:15px;font-weight:600;">🔏 Compliance Record</div>
     <div onclick="closeMenu();nav('notice')" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;color:rgba(255,255,255,.85);font-size:15px;font-weight:600;">📄 My Citation</div>
     <div onclick="closeMenu();showToast('Profile settings coming soon')" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;color:rgba(255,255,255,.85);font-size:15px;font-weight:600;">⚙️ Settings</div>
+    <div style="height:1px;background:rgba(255,255,255,.08);margin:8px 0;"></div>
+    <div onclick="closeMenu();restartApp()" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;color:rgba(255,255,255,.45);font-size:14px;font-weight:600;">🔄 Restart Demo</div>
   </div>
   <div style="padding:20px;border-top:1px solid rgba(255,255,255,.08);">
     <div style="font-size:12px;color:rgba(255,255,255,.25);text-align:center;">MEA v1.0 · MA-2026-048291</div>
@@ -2060,6 +2062,15 @@ function nav(id){
   updateTabBar(id);
   if(id==='map')setTimeout(initMap,420);
   if(id==='defender')initDefenderChat();
+}
+
+function restartApp(){
+  document.querySelectorAll('.s').forEach(s=>s.classList.remove('on','in','back'));
+  navHistory=[];
+  cur='loading';
+  document.getElementById('s-loading').classList.add('on');
+  updateTabBar('loading');
+  setTimeout(()=>nav('splash'),1200);
 }
 
 function goBack(){
