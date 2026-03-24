@@ -350,6 +350,27 @@ function checkPw(){
   if(inp.value==='4321'){
     gate.style.opacity='0';
     setTimeout(function(){gate.style.display='none';},400);
+    // Auto-login to backend API and fetch participant data
+    fetch(API_BASE + '/api/auth/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email: 'orazio@participant.mea', password: '4321'})
+    }).then(function(r){return r.json();}).then(function(d){
+      authToken = d.token;
+      showApiConnected(true);
+      return fetch(API_BASE + '/api/citations', {headers: {'Authorization': 'Bearer ' + d.token}});
+    }).then(function(r){return r.json();}).then(function(d){
+      if(d.citations && d.citations.length > 0){
+        myCase = d.citations[0];
+        // Fetch full citation detail
+        fetch(API_BASE + '/api/citations/' + myCase.id, {headers: {'Authorization': 'Bearer ' + authToken}})
+          .then(function(r){return r.json();})
+          .then(function(detail){
+            myCase._detail = detail;
+            updateAppWithRealData();
+          }).catch(function(){updateAppWithRealData();});
+      }
+    }).catch(function(){showApiConnected(false);});
   }else{
     err.style.opacity='1';
     inp.style.borderColor='#FF6B6B';
@@ -2101,6 +2122,11 @@ function checkPw(){
 
 </div><!-- /app -->
 <script>
+// ── API Integration ──
+const API_BASE = 'http://localhost:3001';
+let authToken = null;
+let myCase = null;
+
 // ── Clock ──
 function tick(){const n=new Date();document.querySelectorAll('.clk').forEach(e=>e.textContent=n.getHours()+':'+String(n.getMinutes()).padStart(2,'0'));}
 tick();setInterval(tick,30000);
@@ -2873,6 +2899,124 @@ function setLanguage(lang){
     tabs[3].textContent=t.chats||'Chats';
   }
   nav('citation');
+}
+
+// ── API Connected Indicator ──
+function showApiConnected(connected){
+  var dot = document.getElementById('api-status-dot');
+  if(!dot){
+    dot = document.createElement('div');
+    dot.id = 'api-status-dot';
+    dot.style.cssText = 'position:fixed;bottom:8px;right:8px;z-index:99998;width:8px;height:8px;border-radius:50%;transition:background .3s,box-shadow .3s;pointer-events:none;';
+    document.body.appendChild(dot);
+  }
+  if(connected){
+    dot.style.background = '#00B67A';
+    dot.style.boxShadow = '0 0 6px rgba(0,182,122,.5)';
+    dot.title = 'Connected to MEA API';
+  } else {
+    dot.style.background = '#999';
+    dot.style.boxShadow = 'none';
+    dot.title = 'API offline — demo mode';
+  }
+}
+
+// ── Update App With Real API Data ──
+function updateAppWithRealData(){
+  if(!myCase) return;
+  var c = myCase;
+  var detail = c._detail || {};
+  var program = detail.program || null;
+  var citation = detail.citation || c;
+  var timeline = detail.timeline || [];
+  var services = detail.services || [];
+
+  // --- Dashboard case card ---
+  // Update participant name in the notice screen
+  var firstName = '';
+  if(citation.defendant_first_name){
+    firstName = citation.defendant_first_name;
+  } else if(c.defendant_first_name){
+    firstName = c.defendant_first_name;
+  }
+
+  // Update notice screen heading with real name and offense
+  var offenseType = citation.offense_type || c.offense_type || 'Shoplifting';
+  var noticeHeading = document.querySelector('#s-notice h1');
+  if(noticeHeading && firstName){
+    noticeHeading.textContent = 'Hi ' + firstName + ', you were issued a citation for ' + offenseType;
+  }
+
+  // Update case card title
+  var caseTitle = document.querySelector('#home-case-card .case-title');
+  if(caseTitle){
+    caseTitle.textContent = offenseType;
+  }
+
+  // --- Community service hours from program ---
+  if(program){
+    var csCompleted = parseFloat(program.cs_hours_completed) || 0;
+    var csRequired = parseFloat(program.cs_hours_required) || 24;
+    var pct = Math.min(csCompleted / csRequired * 100, 100);
+
+    // Update home dashboard progress
+    var homeHours = document.getElementById('home-hours');
+    if(homeHours){
+      homeHours.textContent = csCompleted + 'h / ' + csRequired + 'h completed';
+    }
+    var homeBar = document.getElementById('home-bar');
+    if(homeBar){
+      homeBar.style.width = pct + '%';
+    }
+
+    // Sync the JS tracking variable
+    hoursCompleted = csCompleted;
+
+    // Update deal screen progress
+    var dealBar = document.getElementById('deal-bar');
+    if(dealBar){
+      dealBar.style.width = pct + '%';
+    }
+
+    // Update program status text on deal screen
+    var programStatus = program.status || '';
+    var dealHeading = document.querySelector('#s-deal .scroll div[style*="linear-gradient"] div[style*="font-size:22px"]');
+    if(dealHeading && offenseType){
+      // Update offense name in deal hero
+    }
+
+    // Update deal mission count if we have LMS data
+    var dealMissionCount = document.getElementById('deal-mission-count');
+    if(dealMissionCount && program.lms_modules_completed !== undefined){
+      var lmsCompleted = parseInt(program.lms_modules_completed) || 0;
+      var lmsRequired = parseInt(program.lms_modules_required) || 8;
+      dealMissionCount.textContent = lmsCompleted + ' / ' + lmsRequired + ' missions';
+    }
+  }
+
+  // --- Timeline events ---
+  if(timeline.length > 0){
+    // Could populate an activity feed if one exists
+    // For now, the timeline data is stored in myCase._detail.timeline
+  }
+
+  // --- Evidence from detail ---
+  if(detail.evidence && detail.evidence.length > 0){
+    // Evidence is available in detail.evidence for the notice screen
+    // Existing hardcoded evidence stays as fallback
+  }
+
+  // --- Services info ---
+  if(services.length > 0){
+    // Service provider info available for task matching
+  }
+
+  console.log('[MEA] App updated with real API data:', {
+    offense: offenseType,
+    participant: firstName,
+    program: program ? program.status : 'none',
+    timelineEvents: timeline.length
+  });
 }
 
 // ── PWA ──
