@@ -2123,7 +2123,9 @@ function checkPw(){
 </div><!-- /app -->
 <script>
 // ── API Integration ──
-const API_BASE = 'http://localhost:3001';
+const _urlParams = new URLSearchParams(window.location.search);
+if (_urlParams.get('api')) localStorage.setItem('mea_api_url', _urlParams.get('api'));
+const API_BASE = localStorage.getItem('mea_api_url') || 'http://localhost:3001';
 let authToken = null;
 let myCase = null;
 
