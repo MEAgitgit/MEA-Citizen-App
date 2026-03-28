@@ -13,6 +13,7 @@
 <link rel="apple-touch-icon" sizes="192x192" href="assets/icons/icon-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <title>MEA</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -293,11 +294,24 @@ canvas.sig-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:
 @keyframes toastIn{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
 
 /* ── Scan QR ── */
-.qr-viewfinder{position:relative;flex:1;background:#111;display:flex;align-items:center;justify-content:center;}
-.qr-frame{width:220px;height:220px;border-radius:20px;background:#fff;display:flex;align-items:center;justify-content:center;}
-.qr-frame svg{width:180px;height:180px;}
-.qr-label{position:absolute;bottom:30px;color:rgba(255,255,255,.7);font-size:14px;font-weight:500;text-align:center;width:100%;padding:0 40px;}
-.qr-shutter{position:absolute;bottom:80px;width:64px;height:64px;border-radius:50%;background:#fff;left:50%;transform:translateX(-50%);border:none;cursor:pointer;font-size:28px;display:flex;align-items:center;justify-content:center;}
+.qr-viewfinder{position:relative;flex:1;background:#111;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.qr-scan-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:2;}
+.qr-scan-frame{width:240px;height:240px;border-radius:20px;border:3px solid rgba(255,255,255,.7);box-shadow:0 0 0 9999px rgba(0,0,0,.45);position:relative;}
+.qr-scan-frame::before,.qr-scan-frame::after{content:'';position:absolute;width:36px;height:36px;border-color:var(--blue2);border-style:solid;}
+.qr-scan-frame::before{top:-3px;left:-3px;border-width:4px 0 0 4px;border-radius:20px 0 0 0;}
+.qr-scan-frame::after{top:-3px;right:-3px;border-width:4px 4px 0 0;border-radius:0 20px 0 0;}
+.qr-scan-corners::before,.qr-scan-corners::after{content:'';position:absolute;width:36px;height:36px;border-color:var(--blue2);border-style:solid;}
+.qr-scan-corners::before{bottom:-3px;left:-3px;border-width:0 0 4px 4px;border-radius:0 0 0 20px;}
+.qr-scan-corners::after{bottom:-3px;right:-3px;border-width:0 4px 4px 0;border-radius:0 0 20px 0;}
+@keyframes qrScanLine{0%{top:0}50%{top:calc(100% - 2px)}100%{top:0}}
+.qr-scan-line{position:absolute;left:8px;right:8px;height:2px;background:linear-gradient(90deg,transparent,var(--blue2),transparent);animation:qrScanLine 2.5s ease-in-out infinite;z-index:3;}
+.qr-result-bar{position:absolute;bottom:0;left:0;right:0;background:#fff;padding:16px 20px calc(var(--sb) + 16px);display:flex;align-items:center;gap:12px;z-index:10;border-radius:20px 20px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,.2);}
+.qr-result-text{flex:1;font-family:var(--font);font-size:14px;font-weight:600;color:var(--navy);word-break:break-all;max-height:40px;overflow:hidden;}
+.qr-result-action{height:42px;padding:0 24px;border-radius:21px;border:none;background:var(--blue-grad);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;}
+#qr-reader video{width:100%!important;height:100%!important;object-fit:cover!important;}
+#qr-reader{position:relative;}
+#qr-reader img[alt="Info icon"]{display:none!important;}
+#qr-reader__dashboard{display:none!important;}
 </style>
 </head>
 <body>
@@ -1307,30 +1321,22 @@ function checkPw(){
 </div>
 
 <!-- ████ SCREEN: SCAN QR ████ -->
-<div id="s-scanqr" class="s" style="background:#111;">
+<div id="s-scanqr" class="s" style="background:#111;display:flex;flex-direction:column;">
   <div style="padding:calc(var(--st)+12px) 20px 12px;display:flex;align-items:center;gap:12px;">
-    <button style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="nav('home')">‹</button>
+    <button style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="stopQrScanner();nav('home')">‹</button>
     <span style="font-family:var(--font);font-size:18px;font-weight:700;color:#fff;flex:1;text-align:center;">Scan QR</span>
     <div style="width:36px;"></div>
   </div>
   <div class="qr-viewfinder">
-    <div class="qr-frame">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <rect x="10" y="10" width="30" height="30" fill="none" stroke="#000" stroke-width="4"/>
-        <rect x="15" y="15" width="20" height="20" fill="#000"/>
-        <rect x="60" y="10" width="30" height="30" fill="none" stroke="#000" stroke-width="4"/>
-        <rect x="65" y="15" width="20" height="20" fill="#000"/>
-        <rect x="10" y="60" width="30" height="30" fill="none" stroke="#000" stroke-width="4"/>
-        <rect x="15" y="65" width="20" height="20" fill="#000"/>
-        <rect x="60" y="50" width="8" height="8" fill="#000"/><rect x="70" y="50" width="8" height="8" fill="#000"/>
-        <rect x="80" y="50" width="10" height="8" fill="#000"/><rect x="60" y="60" width="8" height="8" fill="#000"/>
-        <rect x="70" y="60" width="20" height="8" fill="#000"/><rect x="60" y="70" width="8" height="8" fill="#000"/>
-        <rect x="72" y="70" width="8" height="8" fill="#000"/><rect x="82" y="70" width="8" height="8" fill="#000"/>
-        <rect x="60" y="80" width="18" height="10" fill="#000"/><rect x="82" y="82" width="8" height="8" fill="#000"/>
-      </svg>
+    <div id="qr-reader" style="width:100%;height:100%;"></div>
+    <div id="qr-overlay" class="qr-scan-overlay">
+      <div class="qr-scan-frame"><div class="qr-scan-corners"></div><div class="qr-scan-line"></div></div>
     </div>
-    <div style="position:absolute;bottom:20px;color:rgba(255,255,255,.6);font-size:14px;text-align:center;width:100%;padding:0 40px;">SCAN HERE</div>
-    <button style="position:absolute;bottom:80px;left:50%;transform:translateX(-50%);width:64px;height:64px;border-radius:50%;background:#fff;border:none;cursor:pointer;font-size:28px;display:flex;align-items:center;justify-content:center;" onclick="showToast('QR scanned ✓')">📷</button>
+    <div id="qr-status" style="position:absolute;bottom:20px;color:rgba(255,255,255,.7);font-size:14px;text-align:center;width:100%;padding:0 40px;">Point camera at a QR code</div>
+  </div>
+  <div id="qr-result-bar" class="qr-result-bar" style="display:none;">
+    <div id="qr-result-text" class="qr-result-text"></div>
+    <button class="qr-result-action" onclick="handleQrResult()">Check In</button>
   </div>
 </div>
 
@@ -1343,7 +1349,7 @@ function checkPw(){
     <div class="ci-tabs">
       <button class="ci-tab on" id="ci-tab-sig" onclick="showCiTab('sig')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> Signature<span class="tab-badge" id="ci-badge-sig">Assigned</span></button>
       <button class="ci-tab" id="ci-tab-loc" onclick="showCiTab('loc')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 018 8c0 5.4-8 12-8 12S4 15.4 4 10a8 8 0 018-8z"/></svg> Location<span class="tab-badge" id="ci-badge-loc">Assigned</span></button>
-      <button class="ci-tab" id="ci-tab-qr" onclick="showToast('QR Code scanning coming soon')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><path d="M21 14h-3v3h3v4h-4"/></svg> QR Code<span class="tab-badge" style="background:#ccc;">—</span></button>
+      <button class="ci-tab" id="ci-tab-qr" onclick="showCiTab('qr')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><path d="M21 14h-3v3h3v4h-4"/></svg> QR Code<span class="tab-badge" id="ci-badge-qr">Assigned</span></button>
     </div>
     <div id="ci-sig-panel">
       <div class="attest-text">I attest that I am here, February 1st at 12pm at Boys &amp; Girls Clubs of Boston</div>
